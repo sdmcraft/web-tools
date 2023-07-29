@@ -84,6 +84,10 @@ async function pollForData(jobId) {
     return;
   }
 
+  // Show the spinner while polling is ongoing
+  const spinnerRow = document.getElementById("spinnerRow");
+  spinnerRow.style.display = "table-row";
+
   const response = await fetch(`/lhs/${jobId}`);
   if (response.status === 200) {
     const data = await response.json();
@@ -97,6 +101,7 @@ async function pollForData(jobId) {
     } else if (data.status === 'completed') {
       console.log('job completed');
       jobId = null; // Reset jobId when all data is received
+      spinnerRow.style.display = "none";
     } else {
       console.error("Unexpected server response:", response);
       alert("Error fetching CSV data. Please check the URL and try again.");
