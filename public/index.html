@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV Viewer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <table id="csvTable">
+    <thead>
+      <tr>
+        <th onclick="sortTable(0)">URL</th>
+        <th onclick="sortTable(1)">Performance Score</th>
+        <th onclick="sortTable(2)">Accessibility Score</th>
+        <th onclick="sortTable(3)">Best Practices Score</th>
+        <th onclick="sortTable(4)">Overall Score</th>
+      </tr>
+    </thead>
+    <tbody id="csvBody">
+      <!-- CSV data will be dynamically inserted here -->
+    </tbody>
+  </table>
+
+  <script src="script.js"></script>
+</body>
+</html>
