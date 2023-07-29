@@ -1,6 +1,6 @@
 import lighthouse from 'lighthouse';
 import { launch } from 'chrome-launcher';
-import { convertJSONToCSV, fetchUrls, franklinIndexParser } from './utils.js';
+import { fetchUrls, franklinIndexParser } from './utils.js';
 import NodeCache from 'node-cache';
 import { v4 as uuidv4 } from 'uuid';
 

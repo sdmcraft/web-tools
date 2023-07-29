@@ -1,10 +1,8 @@
 import { submitLHSJob, getLHSJob } from './lhs.js';
 import express from 'express';
-import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import NodeCache from 'node-cache';
-import { get } from 'http';
 
 const resultCache = new NodeCache();
 
@@ -42,33 +40,11 @@ app.get('/lhs/:jobId', (req, res) => {
 
   if (jobResult !== undefined) {
     // Job result found in the cache
-    res.json({ result: jobResult });
+    res.json(jobResult);
   } else {
     // Job result not yet available
     res.status(404).json({ error: 'Job result not found. Please try again later.' });
   }
-});
-
-
-// Route to handle form submission and save the user name to a text file
-app.post('/save', (req, res) => {
-  const { username } = req.body;
-
-  if (!username || username.trim() === '') {
-    res.send('Please enter a valid username.');
-    return;
-  }
-
-  // Save the user name to a text file
-  fs.appendFile('usernames.txt', username + '\n', (err) => {
-    if (err) {
-      console.error('Error saving the username:', err);
-      res.status(500).send('Error saving the username.');
-    } else {
-      console.log('Username saved:', username);
-      res.send('Username saved successfully.');
-    }
-  });
 });
 
 // Start the server
