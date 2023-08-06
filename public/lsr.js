@@ -40,16 +40,17 @@ async function traverseCurrentFolder() {
   const [prefix] = window.location.href.split('/Shared%20Documents/');
   const usp = new URLSearchParams(window.location.search);
   const rootPath = usp.get('id').split('/Shared Documents')[1];
-  const omittedFolders = window.omitFolders.split(',').map(item => item.trim()) || [];
-  omittedFolders.push('import-report.xlsx');
-  omittedFolders.push('query-index.xlsx');
+  const omittedItems = window.omitFolders.split(',').map(item => item.trim()) || [];
+  omittedItems.push('import-report.xlsx');
+  omittedItems.push('query-index.xlsx');
+  omittedItems.push('_drafts');
   const action = window.action;
   const domainPrefix = window.domainPrefix.endsWith('/') ? window.domainPrefix.substring(0, window.domainPrefix.length - 1) : window.domainPrefix;
 
   const traverseFolder = async (path) => {
-    if(count > 10) return;
-    for (let i = 0; i < omittedFolders.length; i += 1) {
-      if (path.endsWith(omittedFolders[i])) {
+    if(count > MAX_COUNT) return;
+    for (let i = 0; i < omittedItems.length; i += 1) {
+      if (path.endsWith(omittedItems[i])) {
         console.log(`Skipping ${path}`);
         return;
       }
@@ -68,10 +69,18 @@ async function traverseCurrentFolder() {
     const getFolders = async (path) => await getDirEntries(path, 'Folders');
     const files = await getFiles(path);
     files.every((file) => {
+      for (let i = 0; i < omittedItems.length; i += 1) {
+        if (file.endsWith(omittedItems[i])) {
+          console.log(`Skipping ${file}`);
+          return true;
+        }
+      }
       let cleanPath = '';
-      if (file.endsWith('.docx')) cleanPath = file.split('.')[0].substring(rootPath.length);
-      if (file.endsWith('.xlsx')) cleanPath = file.split('.')[0].substring(rootPath.length) + '.json';
-      if (file.endsWith('.pdf')) cleanPath = file.split('.')[0].substring(rootPath.length) + '.pdf';
+      const lastDotIndex = file.lastIndexOf('.');
+      if (file.endsWith('.docx')) cleanPath = (lastDotIndex !== -1 ? file.substring(0, lastDotIndex) : file).substring(rootPath.length);
+      if (file.endsWith('.xlsx')) cleanPath = (lastDotIndex !== -1 ? file.substring(0, lastDotIndex) : file).substring(rootPath.length) + '.json';
+      if (file.endsWith('.pdf')) cleanPath = (lastDotIndex !== -1 ? file.substring(0, lastDotIndex) : file).substring(rootPath.length) + '.pdf';
+      if (file.endsWith('.svg')) cleanPath = (lastDotIndex !== -1 ? file.substring(0, lastDotIndex) : file).substring(rootPath.length) + '.svg';
 
       cleanPath = cleanPath.toLowerCase();
       cleanPath = cleanPath.replaceAll(' ', '-');
@@ -80,7 +89,6 @@ async function traverseCurrentFolder() {
       cleanPath = cleanPath.replaceAll('--', '-');
       cleanPath = cleanPath.replaceAll('--', '-');
       cleanPath = cleanPath.replaceAll('--', '-');
-
       if (cleanPath.trim() !== '') {
         count += 1;
         URLs.push(`${domainPrefix}${cleanPath}`);
@@ -100,6 +108,7 @@ async function traverseCurrentFolder() {
   console.log(URLs.join('\n'));
   for (let i = 0; i < URLs.length; i += 1) {
     await postData(URLs[i], action);
+    console.log(`Posted ${i + 1} of ${URLs.length}`);
   }
 }
 

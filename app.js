@@ -3,6 +3,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import NodeCache from 'node-cache';
+import cors from 'cors';
 
 const resultCache = new NodeCache();
 
@@ -11,6 +12,8 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = 3000;
+
+app.use(cors());
 
 // Set up middleware to parse request bodies
 app.use(express.urlencoded({ extended: true }));
