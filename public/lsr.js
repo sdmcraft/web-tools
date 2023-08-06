@@ -1,4 +1,4 @@
-const frkActions = [ 'preview', 'live'];
+const frkActions = ['preview', 'live'];
 let count = 0;
 const MAX_COUNT = 1000;
 
@@ -22,10 +22,11 @@ function parseURL(url) {
 
 
 async function postData(url, action) {
-  const json = parseURL(url);
-  const postUrl = `https://admin.hlx.page/${frkActions[action - 1]}/${json.org}/${json.repo}/${json.branch}/${json.path}`;
-
   try {
+    const json = parseURL(url);
+    const postUrl = `https://admin.hlx.page/${frkActions[action - 1]}/${json.org}/${json.repo}/${json.branch}/${json.path}`;
+
+
     console.log('Posting to', postUrl);
     const response = await fetch(postUrl, { method: 'POST' });
     console.log('Response:', response.status);
@@ -48,7 +49,7 @@ async function traverseCurrentFolder() {
   const domainPrefix = window.domainPrefix.endsWith('/') ? window.domainPrefix.substring(0, window.domainPrefix.length - 1) : window.domainPrefix;
 
   const traverseFolder = async (path) => {
-    if(count > MAX_COUNT) return;
+    if (count > MAX_COUNT) return;
     for (let i = 0; i < omittedItems.length; i += 1) {
       if (path.endsWith(omittedItems[i])) {
         console.log(`Skipping ${path}`);
