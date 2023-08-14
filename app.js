@@ -5,13 +5,53 @@ import { fileURLToPath } from 'url';
 import NodeCache from 'node-cache';
 import cors from 'cors';
 
+import fs from 'fs/promises';
+
 const resultCache = new NodeCache();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = 3000;
+const port = 3001;
+
+const ASSET_BIN = 'asset-bin';
+
+
+// Handle the image URL and save it locally
+app.get('/asset-bin', async (req, res) => {
+  const imageUrl = req.query.src;
+  if (!imageUrl) {
+    return res.status(400).json({ error: 'Image URL is missing.' });
+  }
+
+  try {
+
+    const fetchHeaders = new Headers();
+    fetchHeaders.set('Authorization', req.header('Authorization'));
+    fetchHeaders.set('x-api-key', req.header('x-api-key'));
+
+    const response = await fetch(imageUrl, { headers: fetchHeaders });
+
+    if (!response.ok) {
+      throw new Error('Image request failed');
+    }
+
+    const imageBuffer = await response.arrayBuffer();
+    const imageFileName = `${Date.now()}_${path.basename(imageUrl)}`;
+    const imagePath = path.join(__dirname, `/public/${ASSET_BIN}/`, imageFileName);
+
+    await fs.writeFile(imagePath, Buffer.from(imageBuffer));
+
+    const localImageUrl = `/${ASSET_BIN}/${imageFileName}`;
+    const completeUrl = `${req.protocol}://${req.get('host')}${localImageUrl}`;
+
+    res.json({ 'asset-url': completeUrl });
+  } catch (error) {
+    console.error('Error processing image:', error);
+    res.status(500).json({ error: 'Error processing image.' });
+  }
+});
 
 app.use(cors());
 
