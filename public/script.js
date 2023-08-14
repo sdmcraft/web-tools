@@ -36,21 +36,21 @@ function appendToTable(data) {
       urlCell.textContent = item.url;
       row.appendChild(urlCell);
 
-      const accessibilityScoreCell = document.createElement("td");
-      accessibilityScoreCell.textContent = item.accessibilityScore;
-      row.appendChild(accessibilityScoreCell);
+      // const accessibilityScoreCell = document.createElement("td");
+      // accessibilityScoreCell.textContent = item.accessibilityScore;
+      // row.appendChild(accessibilityScoreCell);
 
-      const bestPracticesScoreCell = document.createElement("td");
-      bestPracticesScoreCell.textContent = item.bestPracticesScore;
-      row.appendChild(bestPracticesScoreCell);
+      // const bestPracticesScoreCell = document.createElement("td");
+      // bestPracticesScoreCell.textContent = item.bestPracticesScore;
+      // row.appendChild(bestPracticesScoreCell);
 
       const performanceScoreCell = document.createElement("td");
       performanceScoreCell.textContent = item.performanceScore;
       row.appendChild(performanceScoreCell);
 
-      const totalScoreCell = document.createElement("td");
-      totalScoreCell.textContent = item.performanceScore + item.bestPracticesScore + item.accessibilityScore;
-      row.appendChild(totalScoreCell);
+      // const totalScoreCell = document.createElement("td");
+      // totalScoreCell.textContent = item.performanceScore + item.bestPracticesScore + item.accessibilityScore;
+      // row.appendChild(totalScoreCell);
 
       // Add the row to the table body
       tableBody.appendChild(row);
