@@ -17,6 +17,10 @@ const port = 3001;
 
 const ASSET_BIN = 'asset-bin';
 
+app.use(cors({
+  origin: '*',
+}));
+
 
 // Handle the image URL and save it locally
 app.get('/asset-bin', async (req, res) => {
@@ -52,8 +56,6 @@ app.get('/asset-bin', async (req, res) => {
     res.status(500).json({ error: 'Error processing image.' });
   }
 });
-
-app.use(cors());
 
 // Set up middleware to parse request bodies
 app.use(express.urlencoded({ extended: true }));
