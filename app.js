@@ -1,4 +1,5 @@
 import { submitLHSJob, getLHSJob } from './lhs.js';
+import renderPage from './render.js';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -89,6 +90,21 @@ app.get('/lhs/:jobId', (req, res) => {
   } else {
     // Job result not yet available
     res.status(404).json({ error: 'Job result not found. Please try again later.' });
+  }
+});
+
+app.get('/render', async (req, res) => {
+  const srcUrl = req.query.src;
+
+  if (!srcUrl) {
+    return res.status(400).send('Please provide a valid "src" parameter.');
+  }
+
+  try {
+    const renderedContent = await renderPage(srcUrl);
+    res.send(renderedContent);
+  } catch (error) {
+    res.status(500).send(error.message);
   }
 });
 

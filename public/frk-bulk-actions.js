@@ -1,7 +1,24 @@
-import { parseURL } from './common-utils.js';
 const frkActions = ['list', 'preview', 'live'];
 let count = 0;
 const MAX_COUNT = 1000;
+
+function parseURL(url) {
+  const regex = /^https:\/\/([\w-]+)--([\w-]+)--([\w-]+)\.hlx\.page\/([\w\/-]+(\.\w+)?)$/;
+  const matches = url.match(regex);
+
+  if (matches) {
+      const [, branch, repo, org, path, extension] = matches;
+      const result = {
+          branch: branch,
+          repo: repo,
+          org: org,
+          path: path,
+      };
+      return result;
+  } else {
+      return null;
+  }
+}
 
 async function postData(url, action) {
   try {
