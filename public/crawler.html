@@ -1,34 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="crawler.css" />
     <title>Web Crawler</title>
-    <link rel="stylesheet" href="crawler.css">
-</head>
-<body>
-    <h1>Web Crawler</h1>
-    <form id="crawlerForm">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Web Crawler</h1>
+      <form id="crawlerForm">
         <label for="startUrl">Start URL:</label>
-        <input type="text" id="startUrl" name="startUrl" required>
-        <button type="submit">Submit</button>
-    </form>
-
-    <div id="loadingSpinner">Crawling in progress... <span class="loader"></span></div>
-    <div id="crawlingCompleteMessage" style="display: none;">Crawling is complete.</div>
-
-    <h2>Total URLs Crawled: <span id="urlCount">0</span></h2>
-
-    <h2>Discovered URLs:</h2>
-    <table id="urlTable">
+        <input type="url" id="startUrl" required />
+        <button type="submit">Start Crawling</button>
+      </form>
+      <div class="spinner-container" id="spinnerContainer">
+        <div class="spinner"></div>
+      </div>
+      <p id="crawlingCompleteMessage" style="display: none">
+        Crawling completed!
+      </p>
+      <p>Total URLs crawled: <span id="urlCount">0</span></p>
+      <div class="table-controls">
+        <button onclick="downloadCsv()">Download CSV</button>
+      </div>
+      <table id="urlTable">
         <thead>
-            <tr>
-                <th onclick="sortTable(0)">URL</th>
-            </tr>
+          <tr>
+            <th onclick="sortTable(0)">URL</th>
+            <th onclick="sortTable(1)">Parent</th>
+          </tr>
         </thead>
         <tbody></tbody>
-    </table>
-
+      </table>
+    </div>
     <script src="crawler.js"></script>
-</body>
+  </body>
 </html>
