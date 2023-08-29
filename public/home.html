@@ -25,20 +25,32 @@
   }
 
   .title {
-    font-size: 24px;
+    font-size: 36px;
     font-weight: bold;
     margin-bottom: 20px;
+    color: #333;
+  }
+
+  .subheading {
+    font-size: 18px;
+    color: #555;
+    margin-top: 10px;
+    margin-bottom: 10px;
   }
 
   .button-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
     margin-top: 20px;
   }
 
   .button {
-    display: inline-block;
-    padding: 20px;
-    width: 200px;
+    flex: 1;
+    max-width: 250px;
     text-align: center;
+    padding: 20px;
     font-size: 20px;
     font-weight: bold;
     text-decoration: none;
@@ -47,7 +59,6 @@
     border: none;
     border-radius: 20px;
     cursor: pointer;
-    margin: 10px;
     transition: background-color 0.3s;
   }
 
@@ -68,8 +79,26 @@
 <div class="container">
   <div class="title">Web Tools - for fun and profit</div>
   <div class="button-container">
-    <a href="/site-state.html" class="button">Publication Checker</a>
-    <a href="/crawler.html" class="button blue">Crawler</a>
+    <a href="/site-state.html" class="button">
+      <div class="subheading">Find when pages were last edited, previewed, or published</div>
+      Publication Checker
+    </a>
+    <a href="/crawler.html" class="button blue">
+      <div class="subheading">Crawl a website to collect data</div>
+      Crawler
+    </a>
+    <a href="https://thinktanked.org/tools/deep-psi/deep-psi.html" class="button green">
+      <div class="subheading">Sample and compare PSI for a webpage</div>
+      DeepPSI
+    </a>
+    <a href="https://thinktanked.org/tools/bulk/bulk.html" class="button">
+      <div class="subheading">Bulk preview and publish webpages</div>
+      Bulk Publish
+    </a>
+    <a href="https://github.com/coderthoughts/docxtools/blob/main/README.md" class="button blue">
+      <div class="subheading">A command-line utility to work with docx files</div>
+      Docx Tools
+    </a>
   </div>
 </div>
 </body>
