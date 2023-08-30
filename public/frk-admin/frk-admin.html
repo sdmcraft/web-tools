@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="frk-admin.css" />
+    <title>Franklin Admin Actions</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Franklin Admin Actions</h1>
+      <form id="github-form">
+        <label for="org-input">GitHub Org:</label>
+        <input type="text" id="org-input" required />
+
+        <label for="repo-input">GitHub Repo:</label>
+        <input type="text" id="repo-input" required />
+
+        <label for="branch-input">Branch:</label>
+        <input type="text" id="branch-input" required />
+
+        <label for="path-input">Path:</label>
+        <input type="text" id="path-input" />
+      </form>
+    </div>
+
+    <button id="purge-cache-btn">Purge Live Cache</button>
+
+    <a
+      href="https://master-sacred-dove.ngrok-free.app/home.html"
+      target="_blank"
+      >Explore All Web Tools</a
+    >
+
+    <script src="frk-admin.js"></script>
+  </body>
+</html>
