@@ -50,6 +50,11 @@ async function updateTable(urls) {
   let processedCount = 0;
   let problemCount = 0;
 
+  // Clear existing rows from the table
+  while (tableBody.firstChild) {
+    tableBody.removeChild(tableBody.firstChild);
+  }
+
   for (const url of urls) {
     const data = await fetchData(url);
     if (data) {
