@@ -1,8 +1,26 @@
-import { parseURL } from "./common-utils.js";
-
 const form = document.getElementById("url-form");
 const urlInput = document.getElementById("url-input");
 const tableBody = document.getElementById("table-body");
+const statusInfo = document.getElementById("status-info");
+
+function parseURL(url) {
+  const regex = /^https:\/\/([\w-]+)--([\w-]+)--([\w-]+)\.(hlx\.page|hlx\.live)\/([\w\/-]+(\.\w+)?)$/;
+  const matches = url.match(regex);
+
+  if (matches) {
+    const [, branch, repo, org, domain, path, extension] = matches;
+    const result = {
+      branch: branch,
+      repo: repo,
+      org: org,
+      domain: domain,
+      path: path,
+    };
+    return result;
+  } else {
+    return null;
+  }
+}
 
 async function fetchData(url) {
   try {
@@ -15,6 +33,17 @@ async function fetchData(url) {
     console.error(`Error fetching data for URL ${url}:`, error);
     return null;
   }
+}
+
+function getStatus(editDate, previewDate, liveDate) {
+  const editModified = new Date(editDate);
+  const previewModified = new Date(previewDate);
+  const liveModified = new Date(liveDate);
+  return editModified < previewModified && previewModified < liveModified;
+}
+
+function updateStatusInfo(problems, processed, total) {
+  statusInfo.textContent = `Processed(Problems)/Total = ${processed}(${problems})/${total}`;
 }
 
 async function updateTable(urls) {
@@ -31,33 +60,16 @@ async function updateTable(urls) {
       }
       const newRow = document.createElement("tr");
       newRow.innerHTML = `
-      <td>${url}</td>
-      <td>${data.edit.lastModified}</td>
-      <td>${data.preview.lastModified}</td>
-      <td>${data.live.lastModified}</td>
-      <td>${status ? '<span class="green">&#10004;</span>' : '<span class="orange">&#9888;</span>'}</td>
-    `;
+        <td>${url}</td>
+        <td>${data.edit.lastModified}</td>
+        <td>${data.preview.lastModified}</td>
+        <td>${data.live.lastModified}</td>
+        <td>${status ? '<span class="green">&#10004;</span>' : '<span class="orange">&#9888;</span>'}</td>
+      `;
       tableBody.appendChild(newRow);
       updateStatusInfo(problemCount, processedCount, urls.length);
     }
   }
-}
-
-function getStatus(editDate, previewDate, liveDate) {
-  const editModified = new Date(editDate);
-  const previewModified = new Date(previewDate);
-  const liveModified = new Date(liveDate);
-  return editModified < previewModified && previewModified < liveModified;
-  if (editModified < previewModified && previewModified < liveModified) {
-    return '<span class="green">&#10004;</span>';
-  } else {
-    return '<span class="orange">&#9888;</span>';
-  }
-}
-
-function updateStatusInfo(problems, processed, total) {
-  const statusInfo = document.getElementById('status-info');
-  statusInfo.textContent = `Processed(Problems)/Total = ${processed}(${problems})/${total}`;
 }
 
 form.addEventListener("submit", (event) => {
