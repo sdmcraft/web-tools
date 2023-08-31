@@ -20,6 +20,9 @@ async function computeLHSWithRetry(url, maxAttempts = 3, minScoreThreshold = 95)
 
     if (currentScore >= minScoreThreshold) {
       break; // Stop retrying if score meets the threshold
+    } else {
+      //wait for 5 seconds before retrying
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
   }
 
