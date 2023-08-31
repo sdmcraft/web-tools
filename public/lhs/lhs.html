@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV Scoreboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="lhs.css">
+</head>
+<body>
+  <h1>LHS Scoreboard</h1>
+  <form id="inputForm">
+    <label for="queryUrl">Enter Query Index URL:</label>
+    <input type="text" id="queryUrl" required>
+    <button type="submit">Load LHS Scorecard</button>
+  </form>
+
+  <button id="downloadCSV">Download CSV</button>
+
+  <table id="scoreboardTable">
+    <thead>
+      <tr>
+        <th data-sort="url">URL</th>
+        <th data-sort="performanceScore">Performance Score</th>
+      </tr>
+    </thead>
+    <tbody id="scoreboardBody">
+      <!-- CSV data will be dynamically inserted here -->
+    </tbody>
+    <tbody id="spinnerRow" class="spinner-row">
+      <tr>
+        <td colspan="2" class="centered-cell">
+          <div class="spinner-container">
+            <div class="spinner"></div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <script src="lhs.js"></script>
+</body>
+</html>

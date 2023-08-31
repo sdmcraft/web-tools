@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import psi from 'psi';
 
 const jobCache = new NodeCache();
-const MAX_TRIALS = 3;
+const MAX_TRIALS = 1;
 async function computLHS(url) {
   console.log('Computing LHS for:', url);
   const perfScores = [];

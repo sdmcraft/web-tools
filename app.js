@@ -1,4 +1,4 @@
-import { submitLHSJob, getLHSJob } from './lhs.js';
+import { submitLHSJob, getLHSJob } from './lhs-computer.js';
 import renderPage from './render.js';
 import express from 'express';
 import path from 'path';
