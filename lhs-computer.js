@@ -5,17 +5,29 @@ import psi from 'psi';
 
 const jobCache = new NodeCache();
 const MAX_TRIALS = 1;
-async function computLHS(url) {
-  console.log('Computing LHS for:', url);
-  const perfScores = [];
-  for(let i = 0; i < MAX_TRIALS; i++) {
+async function computeLHSWithRetry(url, maxAttempts = 3, minScoreThreshold = 95) {
+  console.log('Computing LHS with retry for:', url);
+
+  let attempts = 0;
+  let perfScore = 0;
+
+  while (attempts < maxAttempts) {
     const { data } = await psi(url, { nokey: 'true', strategy: 'mobile' });
-    perfScores.push(data.lighthouseResult.categories.performance.score * 100);
+    const currentScore = data.lighthouseResult.categories.performance.score * 100;
+
+    perfScore += currentScore;
+    attempts++;
+
+    if (currentScore >= minScoreThreshold) {
+      break; // Stop retrying if score meets the threshold
+    }
   }
-  const perfScore = perfScores.reduce((a, b) => a + b, 0) / perfScores.length;
+
+  const avgPerfScore = perfScore / attempts;
+
   const result = {
     url,
-    performanceScore: perfScore,
+    performanceScore: avgPerfScore,
     accessibilityScore: 'NA',
     bestPracticesScore: 'NA',
   };
@@ -24,12 +36,11 @@ async function computLHS(url) {
 
   return result;
 }
-
 async function buildLHSScoreboard(queryUrl, jobId) {
   const job = jobCache.get(jobId);
   const urls = await fetchUrls(queryUrl, franklinIndexParser);
   for (const url of urls) {
-    job.results.push(await computLHS(url));
+    job.results.push(await computeLHSWithRetry(url));
     jobCache.set(jobId, job);
   }
   job.status = 'complete';
