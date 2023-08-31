@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Site State</title>
+    <link rel="stylesheet" href="site-state.css">
+  </head>
+  <body>
+    <form id="url-form">
+      <label for="url-input">Enter URLs (separated by newlines):</label>
+      <textarea id="url-input" name="urls" rows="5" required></textarea>
+      <button type="submit">Submit</button>
+    </form>
+    <p id="status-info"></p>
+    <table>
+      <thead>
+        <tr>
+          <th>URL</th>
+          <th>Edited</th>
+          <th>Previewed</th>
+          <th>Published</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <!-- Table rows will be added here dynamically -->
+      </tbody>
+    </table>
+
+    <script type="module" src="/site-state.js">
+    </script>
+  </body>
+</html>

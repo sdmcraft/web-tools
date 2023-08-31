@@ -1,10 +1,10 @@
 import { submitLHSJob, getLHSJob } from './lhs.js';
+import renderPage from './render.js';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import NodeCache from 'node-cache';
 import cors from 'cors';
-
 import fs from 'fs/promises';
 
 const resultCache = new NodeCache();
@@ -17,10 +17,16 @@ const port = 3001;
 
 const ASSET_BIN = 'asset-bin';
 
+// Middleware for access logging
+app.use((req, res, next) => {
+  const accessLog = `[${new Date().toISOString()}] ${req.method} ${req.url}\n`;
+  fs.appendFile('access.log', accessLog, 'utf8', () => {});
+  next();
+});
+
 app.use(cors({
   origin: '*',
 }));
-
 
 // Handle the image URL and save it locally
 app.get('/asset-bin', async (req, res) => {
@@ -30,7 +36,6 @@ app.get('/asset-bin', async (req, res) => {
   }
 
   try {
-
     const fetchHeaders = new Headers();
     fetchHeaders.set('Authorization', req.header('Authorization'));
     fetchHeaders.set('x-api-key', req.header('x-api-key'));
@@ -70,7 +75,7 @@ app.get('/', (req, res) => {
 
 app.get('/lhs', (req, res) => {
   const queryUrl = req.query.queryUrl;
-  if (req.query.useCache === true && resultCache.has(queryUrl)) {
+  if (req.query.useCache === 'true' && resultCache.has(queryUrl)) {
     res.json(resultCache.get(queryUrl));
   } else {
     const jobId = submitLHSJob(queryUrl);
@@ -84,11 +89,24 @@ app.get('/lhs/:jobId', (req, res) => {
   const jobResult = getLHSJob(jobId);
 
   if (jobResult !== undefined) {
-    // Job result found in the cache
     res.json(jobResult);
   } else {
-    // Job result not yet available
     res.status(404).json({ error: 'Job result not found. Please try again later.' });
+  }
+});
+
+app.get('/render', async (req, res) => {
+  const srcUrl = req.query.src;
+
+  if (!srcUrl) {
+    return res.status(400).send('Please provide a valid "src" parameter.');
+  }
+
+  try {
+    const renderedContent = await renderPage(srcUrl);
+    res.send(renderedContent);
+  } catch (error) {
+    res.status(500).send(error.message);
   }
 });
 

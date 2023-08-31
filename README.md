@@ -1,23 +1,9 @@
 # web-tools
 A collection of handy tools to aid website development.
 
-## LSR Bookmarklet
+## A note about Crawler
+If you are running `web-tools` on Amazon Linux 2023, install the dependencies before for `puppeteer`
 ```
-javascript: (() => {
-    const origin = 'https://main--sunstar-engineering--hlxsites.hlx.page';
-    const omitFolders = '_drafts';
-    const action = window.prompt('For Preview type 1 and for Publish type 2');
-    if(document.getElementById('lsr')) {
-        document.getElementById('lsr').remove();
-    }
-    if (origin && action) {
-        window.domainPrefix = origin;
-        window.omitFolders = omitFolders;
-        window.action = action;
-        const script = document.createElement('script');
-        script.src = 'https://idyllic-bunny-7fbc51.netlify.app/lsr.js';
-        script.id = 'lsr';
-        document.head.append(script);
-    }
-})();
+sudo yum install libXcomposite libXdamage libXrandr libgbm libxkbcommon pango alsa-lib atk at-spi2-atk cups-libs libdrm
 ```
+Thanks a ton to this [youtube video](https://www.youtube.com/watch?v=pdpzrv1H2RM&ab_channel=legendsmnd) for this.

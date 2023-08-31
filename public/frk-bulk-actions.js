@@ -1,4 +1,4 @@
-const frkActions = ['preview', 'live'];
+const frkActions = ['list', 'preview', 'live'];
 let count = 0;
 const MAX_COUNT = 1000;
 
@@ -7,24 +7,23 @@ function parseURL(url) {
   const matches = url.match(regex);
 
   if (matches) {
-    const [, branch, repo, org, path, extension] = matches;
-    const result = {
-      branch: branch,
-      repo: repo,
-      org: org,
-      path: path,
-    };
-    return result;
+      const [, branch, repo, org, path, extension] = matches;
+      const result = {
+          branch: branch,
+          repo: repo,
+          org: org,
+          path: path,
+      };
+      return result;
   } else {
-    return null;
+      return null;
   }
 }
-
 
 async function postData(url, action) {
   try {
     const json = parseURL(url);
-    const postUrl = `https://admin.hlx.page/${frkActions[action - 1]}/${json.org}/${json.repo}/${json.branch}/${json.path}`;
+    const postUrl = `https://admin.hlx.page/${frkActions[action]}/${json.org}/${json.repo}/${json.branch}/${json.path}`;
 
 
     console.log('Posting to', postUrl);
@@ -107,9 +106,11 @@ async function traverseCurrentFolder() {
   }
   await traverseFolder(rootPath);
   console.log(URLs.join('\n'));
-  for (let i = 0; i < URLs.length; i += 1) {
-    await postData(URLs[i], action);
-    console.log(`Posted ${i + 1} of ${URLs.length}`);
+  if(frkActions[action] !== 'list') {
+    for (let i = 0; i < URLs.length; i += 1) {
+      await postData(URLs[i], action);
+      console.log(`Posted ${i + 1} of ${URLs.length}`);
+    }
   }
 }
 
