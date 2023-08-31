@@ -1,36 +1,27 @@
-import lighthouse from 'lighthouse';
-import { launch } from 'chrome-launcher';
 import { fetchUrls, franklinIndexParser } from './utils.js';
 import NodeCache from 'node-cache';
 import { v4 as uuidv4 } from 'uuid';
+import psi from 'psi';
 
 const jobCache = new NodeCache();
-
+const MAX_TRIALS = 1;
 async function computLHS(url) {
   console.log('Computing LHS for:', url);
-  // Launch a headless Chrome instance
-  const chrome = await launch({ chromeFlags: ['--headless'] });
-  const options = {
-    logLevel: 'error',
-    output: 'json',
-    onlyCategories: ['performance', 'accessibility', 'best-practices'], // You can add more categories here if needed
-    port: chrome.port,
-  };
-
-  // Run Lighthouse
-  const report = await lighthouse(url, options);
-
+  const perfScores = [];
+  for(let i = 0; i < MAX_TRIALS; i++) {
+    const { data } = await psi(url, { nokey: 'true', strategy: 'mobile' });
+    perfScores.push(data.lighthouseResult.categories.performance.score * 100);
+  }
+  const perfScore = perfScores.reduce((a, b) => a + b, 0) / perfScores.length;
   const result = {
     url,
-    performanceScore: report.lhr.categories.performance.score * 100,
-    accessibilityScore: report.lhr.categories.accessibility.score * 100,
-    bestPracticesScore: report.lhr.categories['best-practices'].score * 100,
+    performanceScore: perfScore,
+    accessibilityScore: 'NA',
+    bestPracticesScore: 'NA',
   };
 
   console.log(JSON.stringify(result, null, 2));
 
-  // Close the Chrome instance
-  await chrome.kill();
   return result;
 }
 

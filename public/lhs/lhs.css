@@ -1,3 +1,4 @@
+/* External CSS */
 body {
   font-family: Arial, sans-serif;
 }
@@ -25,7 +26,7 @@ th:hover {
 
 th:after {
   content: "\f0dc";
-  font-family: FontAwesome; /* If you want to use FontAwesome icons */
+  font-family: "Font Awesome 5 Free";
   padding-left: 5px;
 }
 
@@ -62,3 +63,11 @@ th.sorted-desc:after {
   align-items: center;
 }
 
+/* Additional Styles */
+.spinner-row {
+  display: none;
+}
+
+.centered-cell {
+  text-align: center;
+}

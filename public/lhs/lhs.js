@@ -2,7 +2,7 @@ const inputForm = document.getElementById("inputForm");
 const queryUrlInput = document.getElementById("queryUrl");
 const tableBody = document.getElementById("scoreboardBody");
 
-inputForm.addEventListener("submit", (event) => {
+inputForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const csvUrl = queryUrlInput.value.trim();
 
@@ -11,7 +11,7 @@ inputForm.addEventListener("submit", (event) => {
     return;
   }
 
-  startPollingForData(csvUrl);
+  await startPollingForData(csvUrl);
 });
 
 // Function to check if a URL already exists in the table
@@ -31,28 +31,14 @@ function appendToTable(data) {
     if (!hasUrlInTable(item.url)) {
       const row = document.createElement("tr");
 
-      // Add columns for each attribute
       const urlCell = document.createElement("td");
       urlCell.textContent = item.url;
       row.appendChild(urlCell);
-
-      const accessibilityScoreCell = document.createElement("td");
-      accessibilityScoreCell.textContent = item.accessibilityScore;
-      row.appendChild(accessibilityScoreCell);
-
-      const bestPracticesScoreCell = document.createElement("td");
-      bestPracticesScoreCell.textContent = item.bestPracticesScore;
-      row.appendChild(bestPracticesScoreCell);
 
       const performanceScoreCell = document.createElement("td");
       performanceScoreCell.textContent = item.performanceScore;
       row.appendChild(performanceScoreCell);
 
-      const totalScoreCell = document.createElement("td");
-      totalScoreCell.textContent = item.performanceScore + item.bestPracticesScore + item.accessibilityScore;
-      row.appendChild(totalScoreCell);
-
-      // Add the row to the table body
       tableBody.appendChild(row);
     }
   });
@@ -71,11 +57,9 @@ async function startPollingForData(url) {
     if (data.results && data.results.length > 0) {
       appendToTable(data.results);
     }
-    jobId = null; // Reset jobId when all data is received
   } else {
     console.error("Unexpected server response:", response);
     alert("Error fetching LHS Scoreboard. Please check the URL and try again.");
-    jobId = null;
   }
 }
 
@@ -84,7 +68,6 @@ async function pollForData(jobId) {
     return;
   }
 
-  // Show the spinner while polling is ongoing
   const spinnerRow = document.getElementById("spinnerRow");
   spinnerRow.style.display = "table-row";
 
@@ -97,22 +80,19 @@ async function pollForData(jobId) {
     if (data.status === 'pending') {
       setTimeout(() => {
         pollForData(jobId)
-      }, 2000); // Poll every 2 seconds
+      }, 2000);
     } else if (data.status === 'completed') {
       console.log('job completed');
-      jobId = null; // Reset jobId when all data is received
       spinnerRow.style.display = "none";
     } else {
       console.error("Unexpected server response:", response);
       alert("Error fetching CSV data. Please check the URL and try again.");
-      jobId = null; // Reset jobId when all data is received
     }
   }
 }
 
-function sortTable(columnIndex) {
+function sortTable(columnIndex, isAscending) {
   const rows = Array.from(tableBody.querySelectorAll("tr"));
-  const isAscending = columnIndex !== tableBody.dataset.sorted || tableBody.dataset.sortedDirection === 'desc';
   const sortType = rows[0].querySelectorAll("td")[columnIndex].getAttribute("data-sort");
 
   rows.sort((a, b) => {
@@ -125,19 +105,43 @@ function sortTable(columnIndex) {
     }
   });
 
-  // Append sorted rows to the table
   tableBody.innerHTML = '';
   rows.forEach(row => {
     tableBody.appendChild(row);
   });
 
+  const sortedDirection = isAscending ? 'asc' : 'desc';
   tableBody.dataset.sorted = columnIndex;
-  tableBody.dataset.sortedDirection = isAscending ? 'asc' : 'desc';
+  tableBody.dataset.sortedDirection = sortedDirection;
 }
 
-const headers = tableBody.querySelectorAll("th[data-sort]");
+const headers = document.querySelectorAll("th[data-sort]");
 headers.forEach((header, index) => {
   header.addEventListener('click', () => {
-    sortTable(index);
+    const currentSorted = tableBody.dataset.sorted;
+    const isAscending = currentSorted === String(index) && tableBody.dataset.sortedDirection !== 'asc';
+    sortTable(index, isAscending);
   });
 });
+
+// Event listener for the CSV download button
+const downloadButton = document.getElementById("downloadCSV");
+downloadButton.addEventListener("click", () => {
+  downloadCSV();
+});
+
+// Function to download the table data as a CSV file
+function downloadCSV() {
+  const rows = Array.from(tableBody.querySelectorAll("tr"));
+  const csvContent = rows.map(row => {
+    const columns = Array.from(row.querySelectorAll("td")).map(cell => cell.textContent);
+    return columns.join(",");
+  }).join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "scoreboard.csv";
+  link.click();
+}
+
