@@ -1,0 +1,55 @@
+/* Style for the body */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+  }
+
+  /* Style for the main container */
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Style for the form */
+  form {
+    margin-bottom: 20px;
+  }
+
+  /* Style for labels */
+  label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  /* Style for input fields */
+  input[type="text"],
+  input[type="datetime-local"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+
+  /* Style for the submit button */
+  button[type="submit"] {
+    background-color: #007BFF;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  /* Style for the result text */
+  #commitCount {
+    font-size: 20px;
+    font-weight: bold;
+  }

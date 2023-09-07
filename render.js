@@ -61,4 +61,21 @@ async function renderPage(srcUrl) {
   throw new Error('Navigation timeout');
 }
 
-export default renderPage;
+async function render(req, res) {
+  const srcUrl = req.query.src;
+  if(srcUrl.endsWith('.html')) {
+    const response = renderPage(srcUrl);
+    res.setHeader('Content-Type', 'text/html');
+    res.send(response);
+  } else {
+    const response = await fetch(srcUrl);
+    // Get the content type from the response headers
+    const contentType = response.headers.get('content-type');
+    res.setHeader('Content-Type', contentType);
+
+    const responseData = await response.text();
+    res.send(responseData);
+  }
+}
+
+export default render;

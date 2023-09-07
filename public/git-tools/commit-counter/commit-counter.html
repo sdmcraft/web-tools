@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Activity</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th, td {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <h1>GitHub Activity</h1>
+
+  <form id="githubForm">
+    <label for="username">GitHub Username:</label>
+    <input type="text" id="username" required><br>
+
+    <label for="accessToken">GitHub Personal Access Token:</label>
+    <input type="text" id="accessToken" required><br>
+
+    <button type="submit">Fetch GitHub Activity</button>
+  </form>
+
+  <div id="activityData">
+    <!-- Display GitHub activity data as a table -->
+  </div>
+
+  <script>
+    // Function to fetch GitHub repository data
+    function fetchGitHubRepositories(username, accessToken) {
+      // Define the GraphQL query to fetch repository names
+      const graphqlQuery = `
+      {
+        user(login: "${username}") {
+          repositories(first: 100) {
+            nodes {
+              name
+            }
+          }
+        }
+      }
+      `;
+
+      // GitHub GraphQL API endpoint
+      const apiUrl = 'https://api.github.com/graphql';
+
+      // Define the headers with the Authorization token
+      const headers = {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      };
+
+      // Define the GraphQL request body
+      const requestBody = JSON.stringify({
+        query: graphqlQuery,
+      });
+
+      // Make a POST request to the GitHub GraphQL API to fetch repository names
+      return fetch(apiUrl, {
+        method: 'POST',
+        headers: headers,
+        body: requestBody,
+      })
+        .then(response => response.json())
+        .then(data => {
+          const repositories = data.data.user.repositories.nodes.map(node => node.name);
+          return repositories;
+        });
+    }
+
+    // Function to fetch GitHub activity data for a specific repository
+    function fetchRepositoryActivity(username, accessToken, repositoryName) {
+      // Define the GraphQL query to fetch activity data for a repository
+      const graphqlQuery = `
+      {
+        repository(owner: "${username}", name: "${repositoryName}") {
+          name
+          defaultBranchRef {
+            target {
+              ... on Commit {
+                history {
+                  totalCount
+                }
+              }
+            }
+          }
+          issues(states: OPEN) {
+            totalCount
+          }
+          pullRequests(states: OPEN) {
+            totalCount
+          }
+        }
+      }
+      `;
+
+      // GitHub GraphQL API endpoint
+      const apiUrl = 'https://api.github.com/graphql';
+
+      // Define the headers with the Authorization token
+      const headers = {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      };
+
+      // Define the GraphQL request body
+      const requestBody = JSON.stringify({
+        query: graphqlQuery,
+      });
+
+      // Make a POST request to the GitHub GraphQL API to fetch activity data for the repository
+      return fetch(apiUrl, {
+        method: 'POST',
+        headers: headers,
+        body: requestBody,
+      })
+        .then(response => response.json())
+        .then(data => {
+          return data.data.repository;
+        });
+    }
+
+    // Function to fetch and display GitHub activity data
+    async function fetchAndDisplayGitHubActivity() {
+      const username = document.getElementById('username').value;
+      const accessToken = document.getElementById('accessToken').value;
+
+      try {
+        // Fetch repository names
+        const repositoryNames = await fetchGitHubRepositories(username, accessToken);
+
+        // Create a table
+        const table = document.createElement('table');
+
+        // Create table header
+        const headerRow = table.insertRow(0);
+        const headers = ['Repository', 'Total Commits', 'Total Issues', 'Total Pull Requests'];
+        headers.forEach(headerText => {
+          const th = document.createElement('th');
+          th.textContent = headerText;
+          headerRow.appendChild(th);
+        });
+
+        // Fetch and display activity data for each repository
+        for (const repositoryName of repositoryNames) {
+          const repository = await fetchRepositoryActivity(username, accessToken, repositoryName);
+          const dataRow = table.insertRow(-1); // Append a new row
+          dataRow.insertCell(0).textContent = repository.name;
+          dataRow.insertCell(1).textContent = repository.defaultBranchRef.target.history.totalCount;
+          dataRow.insertCell(2).textContent = repository.issues.totalCount;
+          dataRow.insertCell(3).textContent = repository.pullRequests.totalCount;
+        }
+
+        // Display the table
+        const activityDataElement = document.getElementById('activityData');
+        activityDataElement.innerHTML = '';
+        activityDataElement.appendChild(table);
+      } catch (error) {
+        console.error('Error fetching GitHub data:', error);
+        const activityDataElement = document.getElementById('activityData');
+        activityDataElement.innerHTML = `<p>Error fetching GitHub data: ${error.message}</p>`;
+      }
+    }
+
+    // Attach the fetchAndDisplayGitHubActivity function to the form submission
+    const githubForm = document.getElementById('githubForm');
+    githubForm.addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevent form submission
+      fetchAndDisplayGitHubActivity(); // Call the fetchAndDisplayGitHubActivity function
+    });
+  </script>
+</body>
+</html>

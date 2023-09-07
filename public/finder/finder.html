@@ -1,0 +1,45 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="finder.css" />
+    <script src="finder.js" type="module"></script>
+    <title>Web Crawler</title>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Site Selector Search</h2>
+      <form id="filterForm">
+        <div class="form-group">
+          <label for="frkIndexUrl">Franklin Index:</label>
+          <p class="subtext">For e.g. https://main--sunstar-engineering--hlxsites.hlx.page/query-index.json</p>
+          <input type="text" id="frkIndexUrl" name="frkIndexUrl" required>
+
+          <label for="desiredSelector">Search CSS Selector:</label>
+          <p class="subtext">For e.g. .cards</p>
+          <input type="text" id="desiredSelector" name="desiredSelector" required>
+          Few Examples:
+          <table>
+            <tr>
+              <th>Item</th>
+              <th>Selector</th>
+            </tr>
+            <tr>
+              <td>Cards Block</td>
+              <td><pre>.cards</pre></td>
+            </tr>
+            <tr>
+              <td>Breadcrumb Block</td>
+              <td><pre>.breadcrumb</pre></td>
+            </tr>
+          </table>
+        </div>
+        <button type="submit">Filter URLs</button>
+        <h3>Results will appear below<h3>
+        <h6>For the first search on page load, the search results take time (~ 1 minute) to appear. Subsequent searches would be faster.</h6>
+      </form>
+      <div id="spinner" class="spinner"></div>
+      <div id="resultContainer"></div>
+    </div>
+  </body>
+</html>

@@ -1,5 +1,5 @@
 import { submitLHSJob, getLHSJob } from './lhs-computer.js';
-import renderPage from './render.js';
+import render from './render.js';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -103,8 +103,7 @@ app.get('/render', async (req, res) => {
   }
 
   try {
-    const renderedContent = await renderPage(srcUrl);
-    res.send(renderedContent);
+    await render(req, res);
   } catch (error) {
     res.status(500).send(error.message);
   }
