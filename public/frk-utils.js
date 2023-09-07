@@ -1,13 +1,13 @@
 import { fetchProxy } from './utils.js';
 
 export async function fetchUrls(indexUrl, responseParser = franklinIndexParser) {
-    const response = await fetchProxy(indexUrl);
-    if (!response.ok) {
-        throw new Error('Network response was not ok');
+    const content = await fetchProxy(indexUrl);
+    if(!content.contentType.includes('application/json')) {
+        throw new Error('Content is not JSON');
     }
-    const content = await response.json();
+    const json = JSON.parse(content.text);
     // console.log('here is the content' +  JSON.stringify(content.data, null, 2));
-    const urls = responseParser(content, indexUrl);
+    const urls = responseParser(json, indexUrl);
     return urls;
 }
 
