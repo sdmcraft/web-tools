@@ -10,9 +10,21 @@
     <div class="container">
       <h1>Web Crawler</h1>
       <form id="crawlerForm">
-        <label for="startUrl">Start URL:</label>
-        <input type="url" id="startUrl" required />
-        <button type="submit">Start Crawling</button>
+        <div class="form-group">
+          <label for="startUrl">Start URL:</label>
+          <input type="url" id="startUrl" required />
+        </div>
+        <div class="form-group">
+          <label for="omitPatterns">Omit Patterns (comma-separated):</label>
+          <input
+            type="text"
+            id="omitPatterns"
+            placeholder="e.g., .pdf, /admin/"
+          />
+        </div>
+        <div class="form-group">
+          <button type="submit">Start Crawling</button>
+        </div>
       </form>
       <div class="spinner-container" id="spinnerContainer">
         <div class="spinner"></div>
