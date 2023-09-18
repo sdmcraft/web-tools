@@ -36,7 +36,17 @@ document.querySelector('#filterForm').addEventListener('submit', async (event) =
     const desiredSelector = input.value;
 
     const frkIndexUrl = form.elements.frkIndexUrl.value;
-    const urlList = await fetchUrls(frkIndexUrl);
+    // Check if the "List of URLs" field has a value
+    const urlListInput = form.elements.urlList;
+    let urlList = [];
+    if (urlListInput.value) {
+        // Split the input using a regular expression to handle commas, spaces, and newlines
+        urlList = urlListInput.value.split(/,|\s|\n/).map(url => url.trim()).filter(url => url !== '');
+    } else {
+        // If the "List of URLs" field is empty, fetch the list from the Franklin Index URL
+        const frkIndexUrl = form.elements.frkIndexUrl.value;
+        urlList = await fetchUrls(frkIndexUrl);
+    }
 
     const container = document.getElementById('resultContainer');
     container.innerHTML = `

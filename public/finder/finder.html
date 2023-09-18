@@ -13,8 +13,11 @@
         <div class="form-group">
           <label for="frkIndexUrl">Franklin Index:</label>
           <p class="subtext">For e.g. https://main--sunstar-engineering--hlxsites.hlx.page/query-index.json</p>
-          <input type="text" id="frkIndexUrl" name="frkIndexUrl" required>
-
+          <input type="text" id="frkIndexUrl" name="frkIndexUrl">
+          <h4><b>OR</b></h4>
+          <!-- New input field for a list of URLs -->
+          <label for="urlList">List of URLs (comma-separated):</label>
+          <textarea id="urlList" name="urlList" rows="4"></textarea>
           <label for="desiredSelector">Search CSS Selector:</label>
           <p class="subtext">For e.g. .cards</p>
           <input type="text" id="desiredSelector" name="desiredSelector" required>
