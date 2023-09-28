@@ -5,6 +5,10 @@ import { fetchHtml } from "../utils.js";
 
 async function searchForElement(url, selector) {
     const doc = await fetchHtml(url);
+    // If the selector is a string, check if the document contains the string
+    if(selector.startsWith('"') && selector.endsWith('"')) {
+        return doc.body.textContent.includes(selector.substring(1, selector.length - 1));
+    }
     // Modify the selector and condition based on your requirements
     const matchingElements = doc.querySelectorAll(selector);
     return !!matchingElements && matchingElements.length > 0;
@@ -21,6 +25,7 @@ async function filterUrlsWithElement(urls, selector, resultList) {
             const a = document.createElement('a');
             a.href = url;
             a.textContent = url;
+            a.target = '_blank';
             li.appendChild(a);
             resultList.appendChild(li);
             document.querySelector('#matchedCount').textContent = parseInt(document.querySelector('#matchedCount').textContent) + 1;

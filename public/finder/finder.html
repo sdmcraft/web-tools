@@ -18,14 +18,14 @@
           <!-- New input field for a list of URLs -->
           <label for="urlList">List of URLs (comma-separated):</label>
           <textarea id="urlList" name="urlList" rows="4"></textarea>
-          <label for="desiredSelector">Search CSS Selector:</label>
+          <label for="desiredSelector">Search Text Content / CSS Selector:</label>
           <p class="subtext">For e.g. .cards</p>
           <input type="text" id="desiredSelector" name="desiredSelector" required>
           Few Examples:
           <table>
             <tr>
               <th>Item</th>
-              <th>Selector</th>
+              <th>Selector/Text</th>
             </tr>
             <tr>
               <td>Cards Block</td>
@@ -34,6 +34,10 @@
             <tr>
               <td>Breadcrumb Block</td>
               <td><pre>.breadcrumb</pre></td>
+            </tr>
+            <tr>
+              <td>Search text content(Enclose in double quotes)</td>
+              <td><pre>"Sample Text"</pre></td>
             </tr>
           </table>
         </div>
