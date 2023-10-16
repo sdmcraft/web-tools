@@ -9,8 +9,11 @@ document.getElementById('crawlerForm').addEventListener('submit', async function
   event.preventDefault();
 
   const startUrl = document.getElementById('startUrl').value;
-  const omitPatterns = document.getElementById('omitPatterns').value.split(',').map(pattern => pattern.trim());
-
+  const omitPatternVal = document.getElementById('omitPatterns').value;
+  let omitPatterns;
+  if (omitPatternVal) {
+    omitPatterns = document.getElementById('omitPatterns').value.split(',').map(pattern => pattern.trim());
+  }
   if (startUrl) {
     showSpinner();
     crawlingCompleteMessage.style.display = 'none';
@@ -27,9 +30,7 @@ async function crawlWithStartUrl(src, omitPatterns) {
   if (src.endsWith('/')) {
     src = src.slice(0, -1);
   }
-  addUrlToTable(src, '');
-  visitedUrls.add(src);
-  updateUrlCount();
+
   await crawlWebsite(src, src, omitPatterns);
 }
 
@@ -39,11 +40,24 @@ async function crawlWebsite(src, parentUrl, omitPatterns) {
 
   while (retries < maxRetries) {
     try {
-      if (!src.endsWith('.pdf') && !src.endsWith('docx') && !src.endsWith('mp4')) {
-        const renderUrl = `/render?src=${encodeURIComponent(src)}`;
-        const response = await fetch(renderUrl);
-        const html = await response.text();
 
+      const renderUrl = `/render?src=${encodeURIComponent(src)}`;
+      const response = await fetch(renderUrl);
+      const html = await response.text();
+      visitedUrls.add(src);
+      updateUrlCount();
+      if (response.status >= 300 && response.status < 400) {
+        addUrlToTable(src, parentUrl, response.status, 'Redirects to ' + response.headers.get('redirect-location'));
+        await crawlWebsite(response.headers.get('redirect-location'), src, omitPatterns);
+        return;
+      }
+      addUrlToTable(src, parentUrl, response.status);
+      if(response.status !== 200) {
+        return;
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.trim().toLowerCase().includes('text/html')) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
 
@@ -59,10 +73,7 @@ async function crawlWebsite(src, parentUrl, omitPatterns) {
               absoluteUrl = absoluteUrl.slice(0, -1);
             }
             if (!visitedUrls.has(absoluteUrl) && new URL(absoluteUrl).hostname === startDomain) {
-              if (!omitPatterns.some(pattern => absoluteUrl.includes(pattern))) {
-                addUrlToTable(absoluteUrl, parentUrl);
-                visitedUrls.add(absoluteUrl);
-                updateUrlCount();
+              if (!omitPatterns || !omitPatterns.some(pattern => absoluteUrl.includes(pattern))) {
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 await crawlWebsite(absoluteUrl, src, omitPatterns);
               } else {
@@ -73,8 +84,8 @@ async function crawlWebsite(src, parentUrl, omitPatterns) {
             }
           }
         }
+        break;
       }
-      break;
     } catch (error) {
       retries++;
       console.error(`Error crawling ${src} (Attempt ${retries}/${maxRetries}):`, error);
@@ -88,7 +99,7 @@ async function crawlWebsite(src, parentUrl, omitPatterns) {
   }
 }
 
-function addUrlToTable(url, parentUrl) {
+function addUrlToTable(url, parentUrl, status, note = '') {
   const row = urlTable.insertRow();
 
   const urlCell = row.insertCell(0);
@@ -96,6 +107,13 @@ function addUrlToTable(url, parentUrl) {
 
   const parentCell = row.insertCell(1);
   parentCell.textContent = parentUrl;
+
+  const statusCell = row.insertCell(2);
+  statusCell.textContent = status;
+
+  const noteCell = row.insertCell(3);
+  noteCell.textContent = note;
+
 }
 
 function updateUrlCount() {
@@ -127,8 +145,8 @@ function sortTable(column) {
 function downloadCsv() {
   const rows = Array.from(urlTable.rows);
   const csvContent = [
-    ['URL', 'Parent'],
-    ...rows.slice(1).map(row => [row.cells[0].textContent, row.cells[1].textContent])
+    ['URL', 'Parent', 'Status'],
+    ...rows.slice(1).map(row => [row.cells[0].textContent, row.cells[1].textContent, row.cells[2].textContent])
   ]
     .map(row => row.map(cell => `"${cell}"`).join(','))
     .join('\n');

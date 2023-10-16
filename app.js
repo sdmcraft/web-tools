@@ -105,7 +105,7 @@ app.get('/render', async (req, res) => {
   try {
     await render(req, res);
   } catch (error) {
-    res.status(500).send(error.message);
+    console.error(error);
   }
 });
 

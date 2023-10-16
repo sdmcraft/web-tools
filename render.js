@@ -1,6 +1,7 @@
 import puppeteer from 'puppeteer';
 import cheerio from 'cheerio';
 import { URL } from 'url';
+import fetch from "node-fetch";
 
 async function replaceAttributesWithAbsoluteUrls(content, domain) {
   const $ = cheerio.load(content);
@@ -28,11 +29,12 @@ async function renderPage(srcUrl) {
   let retries = 0;
 
   while (retries < maxRetries) {
+    const browser = await puppeteer.launch();
     try {
-      const browser = await puppeteer.launch();
       const page = await browser.newPage();
 
-      await page.goto(srcUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }); // 30 seconds timeout
+      const response = await page.goto(srcUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }); // 30 seconds timeout
+      //console.log(`Status code: ${response.status()} for ${srcUrl}`);
 
       // You can adjust the waiting time based on your needs
       await page.waitForTimeout(2000);
@@ -44,7 +46,6 @@ async function renderPage(srcUrl) {
       });
 
       const content = await page.content();
-      await browser.close();
 
       // Replace attributes with absolute URLs
       const domain = new URL(srcUrl).origin;
@@ -54,6 +55,8 @@ async function renderPage(srcUrl) {
     } catch (error) {
       console.error(`Attempt ${retries + 1} failed: ${error.message}`);
       retries++;
+    } finally {
+      await browser.close();
     }
   }
 
@@ -62,19 +65,31 @@ async function renderPage(srcUrl) {
 }
 
 async function render(req, res) {
+  debugger;
   const srcUrl = req.query.src;
-  if(srcUrl.endsWith('.html')) {
-    const response = renderPage(srcUrl);
-    res.setHeader('Content-Type', 'text/html');
-    res.send(response);
-  } else {
-    const response = await fetch(srcUrl);
-    // Get the content type from the response headers
+  try {
+    const response = await fetch(srcUrl, {
+      method: 'GET',
+      redirect: 'manual',
+    });
+    let responseData = await response.text();
     const contentType = response.headers.get('content-type');
-    res.setHeader('Content-Type', contentType);
-
-    const responseData = await response.text();
+    if (response.status !== 200) {
+      res.setHeader('Content-Type', 'text/html');
+      res.setHeader('redirect-location', response.headers.get('location'));
+      res.status(response.status).send(responseData);
+      return;
+    }
+    if (contentType && contentType.trim().toLowerCase().includes('text/html')) {
+      responseData = await renderPage(srcUrl);
+    } else {
+      responseData = await response.text();
+    }
     res.send(responseData);
+
+  } catch (error) {
+    console.error('Error rendering page:', error);
+    res.status(500).json({ error: 'Error rendering page.' });
   }
 }
 
