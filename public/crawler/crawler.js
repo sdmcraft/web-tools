@@ -46,10 +46,15 @@ async function crawlWebsite(src, parentUrl, omitPatterns) {
       const html = await response.text();
       visitedUrls.add(src);
       updateUrlCount();
-      if (response.status >= 300 && response.status < 400) {
+      if (response.status >= 300 && response.status < 400 && response.headers.get('redirect-location')) {
         addUrlToTable(src, parentUrl, response.status, 'Redirects to ' + response.headers.get('redirect-location'));
         await crawlWebsite(response.headers.get('redirect-location'), src, omitPatterns);
         return;
+      }
+
+      // If the page is not found, throw an error to retry
+      if(response.status === 404 && retries < maxRetries) {
+        throw new Error('404');
       }
       addUrlToTable(src, parentUrl, response.status);
       if(response.status !== 200) {
@@ -146,7 +151,7 @@ function downloadCsv() {
   const rows = Array.from(urlTable.rows);
   const csvContent = [
     ['URL', 'Parent', 'Status'],
-    ...rows.slice(1).map(row => [row.cells[0].textContent, row.cells[1].textContent, row.cells[2].textContent])
+    ...rows.slice(1).map(row => [row.cells[0].textContent, row.cells[1].textContent, row.cells[2].textContent, row.cells[3].textContent])
   ]
     .map(row => row.map(cell => `"${cell}"`).join(','))
     .join('\n');
