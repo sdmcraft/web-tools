@@ -78,6 +78,7 @@ async function crawlWebsite(src, parentUrl, omitPatterns) {
               absoluteUrl = absoluteUrl.slice(0, -1);
             }
             if (!visitedUrls.has(absoluteUrl) && new URL(absoluteUrl).hostname === startDomain) {
+              visitedUrls.add(absoluteUrl);
               if (!omitPatterns || !omitPatterns.some(pattern => absoluteUrl.includes(pattern))) {
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 await crawlWebsite(absoluteUrl, src, omitPatterns);
@@ -90,6 +91,8 @@ async function crawlWebsite(src, parentUrl, omitPatterns) {
           }
         }
         break;
+      } else {
+        break
       }
     } catch (error) {
       retries++;

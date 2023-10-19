@@ -74,8 +74,8 @@ async function render(req, res) {
     });
     let responseData = await response.text();
     const contentType = response.headers.get('content-type');
+    res.setHeader('Content-Type', contentType);
     if (response.status >= 300 && response.status < 400) {
-      res.setHeader('Content-Type', 'text/html');
       const locationHeader = [...response.headers.entries()].find(([key, value]) => key.toLowerCase().trim() === 'location');
       if (locationHeader && locationHeader[1]) {
         res.setHeader('redirect-location', locationHeader[1]);
@@ -85,8 +85,6 @@ async function render(req, res) {
     }
     if (contentType && contentType.trim().toLowerCase().includes('text/html')) {
       responseData = await renderPage(srcUrl);
-    } else {
-      responseData = await response.text();
     }
     res.send(responseData);
 
