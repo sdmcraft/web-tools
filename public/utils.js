@@ -17,7 +17,8 @@ export async function fetchProxy(url) {
 export async function fetchHtml(url) {
   const content = await fetchProxy(url);
   if (!content.contentType.includes('text/html')) {
-    throw new Error('Content is not HTML');
+    console.log(`Content type for ${url} is not text/html`);
+    return null;
   }
   const html = content.text;
   const parser = new DOMParser();

@@ -47,17 +47,24 @@ async function crawlWebsite(src, parentUrl, omitPatterns) {
       visitedUrls.add(src);
       updateUrlCount();
       if (response.status >= 300 && response.status < 400 && response.headers.get('redirect-location')) {
-        addUrlToTable(src, parentUrl, response.status, 'Redirects to ' + response.headers.get('redirect-location'));
+
+        // If the difference between the redirect URL and the original URL is just a trailing slash, ignore it
+        const redirectUrl = response.headers.get('redirect-location').endsWith('/') ? response.headers.get('redirect-location').slice(0, -1) : response.headers.get('redirect-location');
+        const originalUrl = src.endsWith('/') ? src.slice(0, -1) : src;
+
+        if (redirectUrl !== originalUrl) {
+          addUrlToTable(src, parentUrl, response.status, 'Redirects to ' + response.headers.get('redirect-location'));
+        }
         await crawlWebsite(response.headers.get('redirect-location'), src, omitPatterns);
         return;
       }
 
       // If the page is not found, throw an error to retry
-      if(response.status === 404 && retries < maxRetries) {
+      if (response.status === 404 && retries < maxRetries) {
         throw new Error('404');
       }
       addUrlToTable(src, parentUrl, response.status);
-      if(response.status !== 200) {
+      if (response.status !== 200) {
         return;
       }
 

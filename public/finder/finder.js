@@ -5,8 +5,11 @@ import { fetchHtml } from "../utils.js";
 
 async function searchForElement(url, selector) {
     const doc = await fetchHtml(url);
+    if (!doc) {
+        return false;
+    }
     // If the selector is a string, check if the document contains the string
-    if(selector.startsWith('"') && selector.endsWith('"')) {
+    if (selector.startsWith('"') && selector.endsWith('"')) {
         return doc.body.textContent.includes(selector.substring(1, selector.length - 1));
     }
     // Modify the selector and condition based on your requirements
@@ -18,17 +21,21 @@ async function filterUrlsWithElement(urls, selector, resultList) {
     // eslint-disable-next-line no-restricted-syntax
     for (const url of urls) {
         // eslint-disable-next-line no-await-in-loop
-        const hasElement = await searchForElement(url, selector);
-        document.querySelector('#processedCount').textContent = parseInt(document.querySelector('#processedCount').textContent) + 1;
-        if (hasElement) {
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.href = url;
-            a.textContent = url;
-            a.target = '_blank';
-            li.appendChild(a);
-            resultList.appendChild(li);
-            document.querySelector('#matchedCount').textContent = parseInt(document.querySelector('#matchedCount').textContent) + 1;
+        try {
+            const hasElement = await searchForElement(url, selector);
+            document.querySelector('#processedCount').textContent = parseInt(document.querySelector('#processedCount').textContent) + 1;
+            if (hasElement) {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = url;
+                a.textContent = url;
+                a.target = '_blank';
+                li.appendChild(a);
+                resultList.appendChild(li);
+                document.querySelector('#matchedCount').textContent = parseInt(document.querySelector('#matchedCount').textContent) + 1;
+            }
+        } catch (error) {
+            console.error(`Error searching for element on ${url}:`, error);
         }
     }
 }
@@ -39,8 +46,10 @@ document.querySelector('#filterForm').addEventListener('submit', async (event) =
     const form = event.target;
     const input = form.elements.desiredSelector;
     const desiredSelector = input.value;
-
-    const frkIndexUrl = form.elements.frkIndexUrl.value;
+    if (!desiredSelector) {
+        alert('You must enter a selector!');
+        return;
+    }
     // Check if the "List of URLs" field has a value
     const urlListInput = form.elements.urlList;
     let urlList = [];
