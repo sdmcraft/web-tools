@@ -2,6 +2,9 @@ import puppeteer from 'puppeteer';
 import cheerio from 'cheerio';
 import { URL } from 'url';
 import fetch from "node-fetch";
+import NodeCache from 'node-cache';
+
+const resultCache = new NodeCache();
 
 async function replaceAttributesWithAbsoluteUrls(content, domain) {
   const $ = cheerio.load(content);
@@ -64,27 +67,44 @@ async function renderPage(srcUrl) {
   throw new Error('Navigation timeout');
 }
 
+async function fetchUrl(srcUrl) {
+  if (resultCache.has(srcUrl)) {
+    return resultCache.get(srcUrl);
+  }
+  const result = {};
+  const response = await fetch(srcUrl, {
+    method: 'GET',
+    redirect: 'manual',
+  });
+  result.responseData = await response.text();
+  result.contentType = response.headers.get('content-type');
+  result.status = response.status;
+  result.redirectLocation = null;
+  if (result.status >= 300 && result.status < 400) {
+    const locationHeader = [...response.headers.entries()].find(([key, value]) => key.toLowerCase().trim() === 'location');
+    if (locationHeader && locationHeader[1]) {
+      result.redirectLocation = locationHeader[1];
+    }
+    return result;
+  }
+  if (result.contentType && result.contentType.trim().toLowerCase().includes('text/html')) {
+    result.responseData = await renderPage(srcUrl);
+  }
+  resultCache.set(srcUrl, result);
+  return result;
+}
+
 async function render(req, res) {
-  debugger;
   const srcUrl = req.query.src;
   try {
-    const response = await fetch(srcUrl, {
-      method: 'GET',
-      redirect: 'manual',
-    });
-    let responseData = await response.text();
-    const contentType = response.headers.get('content-type');
+    const result = resultCache.get(srcUrl) || await fetchUrl(srcUrl);
+
+    const { contentType, responseData, status, redirectLocation } = result;
     res.setHeader('Content-Type', contentType);
-    if (response.status >= 300 && response.status < 400) {
-      const locationHeader = [...response.headers.entries()].find(([key, value]) => key.toLowerCase().trim() === 'location');
-      if (locationHeader && locationHeader[1]) {
-        res.setHeader('redirect-location', locationHeader[1]);
-      }
-      res.status(response.status).send(responseData);
+    if (status >= 300 && status < 400) {
+      res.setHeader('redirect-location', redirectLocation);
+      res.status(status).send(responseData);
       return;
-    }
-    if (contentType && contentType.trim().toLowerCase().includes('text/html')) {
-      responseData = await renderPage(srcUrl);
     }
     res.send(responseData);
 
