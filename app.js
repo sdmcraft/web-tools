@@ -6,6 +6,9 @@ import { fileURLToPath } from 'url';
 import NodeCache from 'node-cache';
 import cors from 'cors';
 import fs from 'fs/promises';
+import bodyParser from "body-parser";
+import { compare, status } from './visual-compare.js';
+import serveIndex from 'serve-index';
 
 const resultCache = new NodeCache();
 
@@ -20,13 +23,17 @@ const ASSET_BIN = 'asset-bin';
 // Middleware for access logging
 app.use((req, res, next) => {
   const accessLog = `[${new Date().toISOString()}] ${req.method} ${req.url}\n`;
-  fs.appendFile('access.log', accessLog, 'utf8', () => {});
+  fs.appendFile('access.log', accessLog, 'utf8', () => { });
   next();
 });
 
 app.use(cors({
   origin: '*',
 }));
+
+app.use(bodyParser.json());
+
+app.use('/screenshots', express.static('public/screenshots'), serveIndex('public/screenshots', { 'icons': true }))
 
 // Handle the image URL and save it locally
 app.get('/asset-bin', async (req, res) => {
@@ -108,6 +115,53 @@ app.get('/render', async (req, res) => {
     console.error(error);
   }
 });
+
+app.post("/visual-compare", (req, res) => {
+  debugger;
+  const { path, domain, branch } = req.body;
+  const jobId = compare(path, domain, branch);
+  res.status(202).json({ job_id: jobId });
+});
+
+app.get("/visual-compare-status", (req, res) => {
+  const jobId = req.query.jobId; // Retrieve the jobId from the request
+  console.log("Received polling request with jobId:", jobId);
+  const job = status(jobId);
+  if (job.status === 'complete' || job.status === 'in-progress' || job.status === 'pending') {
+    res.status(200).json(job);
+  } else {
+    res.status(500).json(job);
+  }
+});
+
+app.get('/browse', (req, res) => {
+  fs.readdir(directoryPath, (err, files) => {
+    if (err) {
+      return res.status(500).send('Error reading directory');
+    }
+
+    // Generate an HTML list of files with links.
+    const fileList = files.map((file) => {
+      return `<li><a href="/${file}" target="_blank">${file}</a></li>`;
+    });
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Directory Browser</title>
+      </head>
+      <body>
+        <h1>Directory Browser</h1>
+        <ul>${fileList.join('')}</ul>
+      </body>
+      </html>
+    `;
+
+    res.send(html);
+  });
+});
+
 
 // Start the server
 app.listen(port, () => {

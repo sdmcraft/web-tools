@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Visual Compare App</title>
+    <link rel="stylesheet" href="visual-compare.css" />
+  </head>
+  <body>
+    <h1>Visual Compare</h1>
+    <form id="compareForm">
+      <label for="path">Paths (one per line):</label>
+      <textarea id="path" name="path" rows="4" required></textarea><br />
+
+      <label for="domain">Domain:</label>
+      <input type="text" id="domain" name="domain" required /><br />
+
+      <label for="branch">Branch:</label>
+      <input type="text" id="branch" name="branch" required /><br />
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <div id="results"></div>
+    <div id="spinner">
+      <div class="lds-dual-ring"></div>
+    </div>
+
+    <script src="visual-compare.js"></script>
+  </body>
+</html>
