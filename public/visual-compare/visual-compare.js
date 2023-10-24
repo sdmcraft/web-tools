@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
         job.results.forEach(result => {
             results.innerHTML += result + "<br>";
             if(job.status === 'complete' && result.includes('Browse screenshots')) {
-                results.innerHTML += `<a href="/screenshots/${jobId} target='_blank' ">Browse screenshots here</a><br>`;
+                results.innerHTML += `<a href="/screenshots/${jobId}" target="_blank">Browse screenshots here</a><br>`;
             }
         });
         if (job.status === 'complete' || job.status === 'error') {
