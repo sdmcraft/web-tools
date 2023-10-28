@@ -9,6 +9,7 @@ import fs from 'fs/promises';
 import bodyParser from "body-parser";
 import { compare, status } from './visual-compare.js';
 import serveIndex from 'serve-index';
+import find from './finder.js';
 
 const resultCache = new NodeCache();
 
@@ -113,6 +114,27 @@ app.get('/render', async (req, res) => {
     await render(req, res);
   } catch (error) {
     console.error(error);
+  }
+});
+
+app.get('/find', async (req, res) => {
+  const srcUrl = req.query.src;
+  const selector = req.query.selector;
+
+  if (!srcUrl) {
+    return res.status(400).send('Please provide a valid "src" parameter.');
+  }
+
+  if (!selector) {
+    return res.status(400).send('Please provide a valid "selector" parameter.');
+  }
+
+  try {
+    const result = await find(srcUrl, selector);
+    res.json({ result });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send('Error finding element.');
   }
 });
 
