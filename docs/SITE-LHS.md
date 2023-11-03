@@ -1,4 +1,4 @@
-# Markup Finder Tool
+# Tool to find LHS for all indexed pages in a site
 
 ## Introduction
 For computing the LHS score for all the indexed pages in the site.
