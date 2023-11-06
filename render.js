@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer';
+import { chromium } from 'playwright';
 import cheerio from 'cheerio';
 import { URL } from 'url';
 import fetch from "node-fetch";
@@ -32,7 +32,7 @@ async function renderPage(srcUrl) {
   let retries = 0;
 
   while (retries < maxRetries) {
-    const browser = await puppeteer.launch();
+    const browser = await chromium.launch();
     try {
       const page = await browser.newPage();
 
