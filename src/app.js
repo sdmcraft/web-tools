@@ -17,7 +17,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = 3001;
+const port = process.env.port ?? 3001;
 
 const ASSET_BIN = 'asset-bin';
 
@@ -74,11 +74,11 @@ app.get('/asset-bin', async (req, res) => {
 app.use(express.urlencoded({ extended: true }));
 
 // Serve the static files in the "public" directory
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Route to serve the HTML page
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, '../public', 'index.html'));
 });
 
 app.get('/lhs', (req, res) => {

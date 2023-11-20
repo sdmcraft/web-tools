@@ -131,3 +131,5 @@ dist
 
 /public/asset-bin/*
 /public/screenshots
+**/.DS_Store
+**cache.json
