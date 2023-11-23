@@ -81,6 +81,9 @@ async function traverseCurrentFolder() {
       if (file.endsWith('.xlsx')) cleanPath = (lastDotIndex !== -1 ? file.substring(0, lastDotIndex) : file).substring(rootPath.length) + '.json';
       if (file.endsWith('.pdf')) cleanPath = (lastDotIndex !== -1 ? file.substring(0, lastDotIndex) : file).substring(rootPath.length) + '.pdf';
       if (file.endsWith('.svg')) cleanPath = (lastDotIndex !== -1 ? file.substring(0, lastDotIndex) : file).substring(rootPath.length) + '.svg';
+      if (file.endsWith('.png')) cleanPath = (lastDotIndex !== -1 ? file.substring(0, lastDotIndex) : file).substring(rootPath.length) + '.png';
+      if (file.endsWith('.jpg')) cleanPath = (lastDotIndex !== -1 ? file.substring(0, lastDotIndex) : file).substring(rootPath.length) + '.jpg';
+      if (file.endsWith('.jpeg')) cleanPath = (lastDotIndex !== -1 ? file.substring(0, lastDotIndex) : file).substring(rootPath.length) + '.jpeg';
 
       cleanPath = cleanPath.toLowerCase();
       cleanPath = cleanPath.replaceAll(' ', '-');
