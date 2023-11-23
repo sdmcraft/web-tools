@@ -19,22 +19,23 @@ document.getElementById('crawlerForm').addEventListener('submit', async function
     crawlingCompleteMessage.style.display = 'none';
     startDomain = new URL(startUrl).hostname;
     console.log('Starting crawl process for:', startUrl);
-    await crawlWithStartUrl(startUrl, omitPatterns);
+    const reportExternalLinks = document.getElementById('reportExternalLinks').checked;
+    await crawlWithStartUrl(startUrl, omitPatterns, reportExternalLinks);
     hideSpinner();
     crawlingCompleteMessage.style.display = 'block';
     console.log('Crawl process completed.');
   }
 });
 
-async function crawlWithStartUrl(src, omitPatterns) {
+async function crawlWithStartUrl(src, omitPatterns, reportExternalLinks = false) {
   if (src.endsWith('/')) {
     src = src.slice(0, -1);
   }
 
-  await crawlWebsite(src, src, omitPatterns);
+  await crawlWebsite(src, src, omitPatterns, reportExternalLinks);
 }
 
-async function crawlWebsite(src, parentUrl, omitPatterns) {
+async function crawlWebsite(src, parentUrl, omitPatterns, reportExternalLinks = false) {
   const maxRetries = 3;
   let retries = 0;
 
@@ -55,7 +56,7 @@ async function crawlWebsite(src, parentUrl, omitPatterns) {
         if (redirectUrl !== originalUrl) {
           addUrlToTable(src, parentUrl, response.status, 'Redirects to ' + response.headers.get('redirect-location'));
         }
-        await crawlWebsite(response.headers.get('redirect-location'), src, omitPatterns);
+        await crawlWebsite(response.headers.get('redirect-location'), src, omitPatterns, reportExternalLinks);
         return;
       }
 
@@ -84,11 +85,18 @@ async function crawlWebsite(src, parentUrl, omitPatterns) {
             if (absoluteUrl.endsWith('/')) {
               absoluteUrl = absoluteUrl.slice(0, -1);
             }
-            if (!visitedUrls.has(absoluteUrl) && new URL(absoluteUrl).hostname === startDomain) {
+            const hostname = new URL(absoluteUrl).hostname;
+            if(hostname !== startDomain) {
+              if (reportExternalLinks) {
+                addUrlToTable(absoluteUrl, src, 'External link');
+              }
+              continue;
+            }
+            if (!visitedUrls.has(absoluteUrl)) {
               visitedUrls.add(absoluteUrl);
               if (!omitPatterns || !omitPatterns.some(pattern => absoluteUrl.includes(pattern))) {
                 await new Promise(resolve => setTimeout(resolve, 2000));
-                await crawlWebsite(absoluteUrl, src, omitPatterns);
+                await crawlWebsite(absoluteUrl, src, omitPatterns, reportExternalLinks);
               } else {
                 console.log('Skipping (omitted pattern):', absoluteUrl);
               }
