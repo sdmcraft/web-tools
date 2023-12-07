@@ -13,4 +13,4 @@ RUN npx playwright install-deps
 COPY . .
 EXPOSE 3001
 EXPOSE 9229
-CMD [ "node", "app.js" ]
+CMD [ "node", "src/app.js" ]

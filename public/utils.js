@@ -25,3 +25,16 @@ export async function fetchHtml(url) {
   const doc = parser.parseFromString(html, 'text/html');
   return doc;
 }
+
+function declareVariableIfNotExists(variableName) {
+  try {
+      if (typeof eval(variableName) === 'undefined') {
+          eval(`${variableName} = undefined;`);
+          console.log(`${variableName} is now declared.`);
+      } else {
+          console.log(`${variableName} is already declared.`);
+      }
+  } catch (e) {
+      console.error(`Error checking/declaring ${variableName}: ${e.message}`);
+  }
+}

@@ -1,6 +1,22 @@
-const frkActions = ['list', 'preview', 'live'];
-let count = 0;
-const MAX_COUNT = 1000;
+function declareVariableIfNotExists(variableName) {
+  try {
+      if (typeof eval(variableName) === 'undefined') {
+          eval(`${variableName} = undefined;`);
+          console.log(`${variableName} is now declared.`);
+      } else {
+          console.log(`${variableName} is already declared.`);
+      }
+  } catch (e) {
+      console.error(`Error checking/declaring ${variableName}: ${e.message}`);
+  }
+}
+
+declareVariableIfNotExists('frkActions');
+frkActions = ['list', 'preview', 'live'];
+declareVariableIfNotExists('count');
+count = 0;
+declareVariableIfNotExists('MAX_COUNT');
+MAX_COUNT = 10000;
 
 function parseURL(url) {
   const regex = /^https:\/\/([\w-]+)--([\w-]+)--([\w-]+)\.hlx\.page\/([\w\/-]+(\.\w+)?)$/;
@@ -48,6 +64,7 @@ async function traverseCurrentFolder() {
   const domainPrefix = window.domainPrefix.endsWith('/') ? window.domainPrefix.substring(0, window.domainPrefix.length - 1) : window.domainPrefix;
 
   const traverseFolder = async (path) => {
+    console.log(`Traversing ${path}`);
     if (count > MAX_COUNT) return;
     for (let i = 0; i < omittedItems.length; i += 1) {
       if (path.endsWith(omittedItems[i])) {
