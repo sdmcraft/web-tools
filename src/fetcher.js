@@ -119,7 +119,11 @@ export async function fetchUrl(srcUrl) {
     if (result.status >= 300 && result.status < 400) {
         const locationHeader = [...response.headers.entries()].find(([key, value]) => key.toLowerCase().trim() === 'location');
         if (locationHeader && locationHeader[1]) {
-            result.redirectLocation = locationHeader[1];
+            if(locationHeader[1].startsWith('/')) {
+                result.redirectLocation = `${new URL(srcUrl).origin}${locationHeader[1]}`;
+            } else {
+                result.redirectLocation = locationHeader[1];
+            }
         }
         resultCache.set(srcUrl, result);
         saveNeeded = true;
