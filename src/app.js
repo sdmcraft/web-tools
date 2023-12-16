@@ -10,6 +10,7 @@ import bodyParser from "body-parser";
 import { compare, status } from './visual-compare.js';
 import serveIndex from 'serve-index';
 import find from './finder.js';
+import { fetchRequestedUrl } from './fetcher.js';
 
 const resultCache = new NodeCache();
 
@@ -112,6 +113,20 @@ app.get('/render', async (req, res) => {
 
   try {
     await render(req, res);
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+app.get('/fetch', async (req, res) => {
+  const srcUrl = req.query.src;
+
+  if (!srcUrl) {
+    return res.status(400).send('Please provide a valid "src" parameter.');
+  }
+
+  try {
+    await fetchRequestedUrl(req, res);
   } catch (error) {
     console.error(error);
   }

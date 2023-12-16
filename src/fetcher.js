@@ -3,41 +3,61 @@ import { chromium } from 'playwright';
 import cheerio from 'cheerio';
 import { URL } from 'url';
 import fs from 'fs';
+import path from 'path';
 
 const resultCache = new NodeCache();
-const diskCache = process.env.cache ?? 'cache.json';
+const diskCache = process.env.cache ?? 'cache';
 
 import fetch from "node-fetch";
 
-function loadCache(diskCache) {
+function readFileIfExistsSync(folder, filename) {
+    const filePath = path.join(folder, filename);
+
     try {
-        if (fs.existsSync(diskCache)) {
-            // Read the file synchronously
-            const jsonData = fs.readFileSync(diskCache, 'utf8');
-            // Parse the JSON data
-            const parsedData = JSON.parse(jsonData);
-            Object.keys(parsedData).forEach(key => {
-                resultCache.set(key, parsedData[key]['v']);
-            });
+        // Check if the file exists
+        if (fs.existsSync(filePath)) {
+            // Read the contents of the file and return it
+            const fileContent = fs.readFileSync(filePath, 'utf8');
+            return fileContent;
+        } else {
+            console.log(`File "${filename}" not found in "${folder}".`);
+            return null;
         }
     } catch (error) {
-        console.error(`Error reading JSON file: ${error.message}`);
+        console.error(`Error reading file "${filename}": ${error.message}`);
         return null;
     }
 }
 
-function saveCache(diskCache) {
-    if (saveNeeded) {
-        try {
-            // Convert the cache to JSON data
-            const jsonData = JSON.stringify(resultCache.data);
-            // Write the file synchronously
-            fs.writeFileSync(diskCache, jsonData, 'utf8');
-            saveNeeded = false;
-        } catch (error) {
-            console.error(`Error writing JSON file: ${error.message}`);
+function writeToFileSync(folder, filename, text) {
+    // Create the full path by joining the folder and filename
+    const filePath = path.join(folder, filename);
+
+    try {
+        // Create the folder if it doesn't exist
+        if (!fs.existsSync(folder)) {
+            fs.mkdirSync(folder, { recursive: true });
+            console.log(`Folder "${folder}" created.`);
         }
+
+        // Write the text content to the file
+        fs.writeFileSync(filePath, text);
+        console.log(`File "${filename}" successfully written to "${folder}".`);
+    } catch (error) {
+        console.error(`Error writing to file "${filename}": ${error.message}`);
     }
+}
+
+
+function convertUrlToFilename(url) {
+    // Remove protocol and replace non-alphanumeric characters with underscores
+    const filename = url.replace(/^(https?|ftp):\/\//, '').replace(/[^a-zA-Z0-9]+/g, '_');
+
+    // Optionally, limit the length of the filename
+    const maxLength = 100; // You can adjust this based on your requirements
+    const truncatedFilename = filename.substring(0, maxLength);
+
+    return truncatedFilename;
 }
 
 async function replaceAttributesWithAbsoluteUrls(content, domain) {
@@ -71,7 +91,7 @@ async function renderPage(srcUrl) {
         try {
             const page = await browser.newPage();
 
-            const response = await page.goto(srcUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }); // 30 seconds timeout
+            await page.goto(srcUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }); // 30 seconds timeout
             //console.log(`Status code: ${response.status()} for ${srcUrl}`);
 
             // You can adjust the waiting time based on your needs
@@ -102,10 +122,18 @@ async function renderPage(srcUrl) {
     throw new Error('Navigation timeout');
 }
 
-
 export async function fetchUrl(srcUrl) {
-    if (resultCache.get(srcUrl)) {
-        return resultCache.get(srcUrl);
+    debugger;
+    const cachedResult = resultCache.get(convertUrlToFilename(srcUrl));
+    if (cachedResult) {
+        console.log(`Cache hit for ${srcUrl}`);
+        return { responseData: cachedResult };
+    }
+    const savedResult = readFileIfExistsSync(diskCache, convertUrlToFilename(srcUrl));
+    if (savedResult) {
+        console.log(`Disk cache hit for ${srcUrl}`);
+        resultCache.set(convertUrlToFilename(srcUrl), savedResult);
+        return { responseData: savedResult };
     }
     const result = {};
     const response = await fetch(srcUrl, {
@@ -118,27 +146,31 @@ export async function fetchUrl(srcUrl) {
     result.redirectLocation = null;
     if (result.status >= 300 && result.status < 400) {
         const locationHeader = [...response.headers.entries()].find(([key, value]) => key.toLowerCase().trim() === 'location');
-        if (locationHeader && locationHeader[1]) {
-            if(locationHeader[1].startsWith('/')) {
+        if (locationHeader?.[1]) {
+            if (locationHeader[1].startsWith('/')) {
                 result.redirectLocation = `${new URL(srcUrl).origin}${locationHeader[1]}`;
             } else {
                 result.redirectLocation = locationHeader[1];
             }
         }
-        resultCache.set(srcUrl, result);
-        saveNeeded = true;
-        return result;
     }
-    if (result.contentType && result.contentType.trim().toLowerCase().includes('text/html')) {
+    if (result.contentType?.trim().toLowerCase().includes('text/html')) {
         result.responseData = await renderPage(srcUrl);
     }
-    resultCache.set(srcUrl, result);
-    saveNeeded = true;
+    resultCache.set(convertUrlToFilename(srcUrl), result.responseData);
+    writeToFileSync(diskCache, convertUrlToFilename(srcUrl), result.responseData);
     return result;
 }
 
-loadCache(diskCache);
-let saveNeeded = false;
-setInterval(() => {
-    saveCache(diskCache);
-}, 60000);
+export async function fetchRequestedUrl(req, res) {
+    const srcUrl = req.query.src;
+    if (!srcUrl) {
+        res.status(400).send('You must provide a src URL');
+        return;
+    }
+    const result = await fetchUrl(srcUrl);
+    if (result.redirectLocation) {
+        res.setHeader('redirect-location', result.redirectLocation);
+    }
+    res.send(result.responseData);
+}

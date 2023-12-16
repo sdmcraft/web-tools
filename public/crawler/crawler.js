@@ -42,7 +42,7 @@ async function crawlWebsite(src, parentUrl, omitPatterns, reportExternalLinks = 
   while (retries < maxRetries) {
     try {
 
-      const renderUrl = `/render?src=${encodeURIComponent(src)}`;
+      const renderUrl = `/fetch?src=${encodeURIComponent(src)}`;
       const response = await fetch(renderUrl);
       const html = await response.text();
       visitedUrls.add(src);
