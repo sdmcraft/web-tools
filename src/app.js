@@ -87,7 +87,7 @@ app.get('/lhs', (req, res) => {
   if (req.query.useCache === 'true' && resultCache.has(queryUrl)) {
     res.json(resultCache.get(queryUrl));
   } else {
-    const jobId = submitLHSJob(queryUrl);
+    const jobId = submitLHSJob(queryUrl, req.query.bulk !== 'false');
     res.status(202).json({ jobId });
   }
 });

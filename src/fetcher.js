@@ -91,7 +91,7 @@ async function renderPage(srcUrl) {
         try {
             const page = await browser.newPage();
 
-            await page.goto(srcUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }); // 30 seconds timeout
+            await page.goto(srcUrl, { waitUntil: 'networkidle', timeout: 10000 }); // 10 seconds timeout
             //console.log(`Status code: ${response.status()} for ${srcUrl}`);
 
             // You can adjust the waiting time based on your needs
@@ -123,17 +123,16 @@ async function renderPage(srcUrl) {
 }
 
 export async function fetchUrl(srcUrl) {
-    debugger;
     const cachedResult = resultCache.get(convertUrlToFilename(srcUrl));
     if (cachedResult) {
         console.log(`Cache hit for ${srcUrl}`);
-        return { responseData: cachedResult };
+        return { responseData: cachedResult, contentType: 'text/html' };
     }
     const savedResult = readFileIfExistsSync(diskCache, convertUrlToFilename(srcUrl));
     if (savedResult) {
         console.log(`Disk cache hit for ${srcUrl}`);
         resultCache.set(convertUrlToFilename(srcUrl), savedResult);
-        return { responseData: savedResult };
+        return { responseData: savedResult, contentType: 'text/html' };
     }
     const result = {};
     const response = await fetch(srcUrl, {
@@ -156,13 +155,14 @@ export async function fetchUrl(srcUrl) {
     }
     if (result.contentType?.trim().toLowerCase().includes('text/html')) {
         result.responseData = await renderPage(srcUrl);
+        resultCache.set(convertUrlToFilename(srcUrl), result.responseData);
+        writeToFileSync(diskCache, convertUrlToFilename(srcUrl), result.responseData);
     }
-    resultCache.set(convertUrlToFilename(srcUrl), result.responseData);
-    writeToFileSync(diskCache, convertUrlToFilename(srcUrl), result.responseData);
     return result;
 }
 
 export async function fetchRequestedUrl(req, res) {
+    debugger;
     const srcUrl = req.query.src;
     if (!srcUrl) {
         res.status(400).send('You must provide a src URL');
@@ -172,5 +172,6 @@ export async function fetchRequestedUrl(req, res) {
     if (result.redirectLocation) {
         res.setHeader('redirect-location', result.redirectLocation);
     }
+    res.setHeader('Content-Type', result.contentType);
     res.send(result.responseData);
 }

@@ -10,14 +10,18 @@
 <body>
   <h1>LHS Scoreboard</h1>
   <form id="inputForm">
-    <label for="queryUrl">Enter Query Index URL:</label>
-    <input type="text" id="queryUrl" required>
+    <label for="indexUrl">Enter Index URL:</label>
+    <input type="text" id="indexUrl">
+    <br/>
+    <label for="urlList">Enter URL list:</label>
+    <textarea id="urlList" name="urlList" rows="4"></textarea>
     <button type="submit">Load LHS Scorecard</button>
   </form>
 
   <button id="downloadCSV">Download CSV</button>
 
   <table id="scoreboardTable">
+    <caption>Scoreboard Table</caption>
     <thead>
       <tr>
         <th data-sort="url">URL</th>

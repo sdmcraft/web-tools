@@ -1,17 +1,28 @@
 const inputForm = document.getElementById("inputForm");
-const queryUrlInput = document.getElementById("queryUrl");
+const indexUrlInput = document.getElementById("indexUrl");
+const urlListInput = document.getElementById("urlList");
 const tableBody = document.getElementById("scoreboardBody");
+
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 inputForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const csvUrl = queryUrlInput.value.trim();
+  const indexUrl = indexUrlInput.value.trim();
 
-  if (!csvUrl) {
-    alert("Please enter a valid CSV URL.");
-    return;
+  if (indexUrl) {
+    await fetchLHS(indexUrl, true);
+  } else if (urlListInput.value) {
+    const urls = urlListInput.value.split('\n');
+    for (const url of urls) {
+      console.log(`Awaiting data for ${url}...`); // eslint-disable-line no-console
+      await fetchLHS(url, false);
+      console.log(`Data received for ${url}`); // eslint-disable-line no-console
+    }
   }
 
-  await startPollingForData(csvUrl);
+  return void 0;
 });
 
 // Function to check if a URL already exists in the table
@@ -44,51 +55,35 @@ function appendToTable(data) {
   });
 }
 
-async function startPollingForData(url) {
-  const response = await fetch(`/lhs?queryUrl=${url}`);
-  if (response.status === 202) {
-    const data = await response.json();
-    const jobId = data.jobId;
-    setTimeout(() => {
-      pollForData(jobId)
-    }, 2000); // Poll every 2 seconds
-  } else if (response.status === 200) {
-    const data = await response.json();
-    if (data.results && data.results.length > 0) {
-      appendToTable(data.results);
-    }
-  } else {
-    console.error("Unexpected server response:", response);
-    alert("Error fetching LHS Scoreboard. Please check the URL and try again.");
-  }
-}
-
-async function pollForData(jobId) {
-  if (!jobId) {
-    return;
-  }
-
-  const spinnerRow = document.getElementById("spinnerRow");
-  spinnerRow.style.display = "table-row";
-
+async function getJobStatus(jobId) {
   const response = await fetch(`/lhs/${jobId}`);
   if (response.status === 200) {
     const data = await response.json();
-    if (data.results && data.results.length > 0) {
-      appendToTable(data.results);
-    }
-    if (data.status === 'pending') {
-      setTimeout(() => {
-        pollForData(jobId)
-      }, 2000);
-    } else if (data.status === 'completed') {
-      console.log('job completed');
-      spinnerRow.style.display = "none";
-    } else {
-      console.error("Unexpected server response:", response);
-      alert("Error fetching CSV data. Please check the URL and try again.");
-    }
+    return data;
+  } else {
+    return null;
   }
+}
+
+async function fetchLHS(url, isBulk = true) {
+  const spinnerRow = document.getElementById("spinnerRow");
+  spinnerRow.style.display = "table-row";
+
+  let response = await fetch(`/lhs?queryUrl=${url}&bulk=${isBulk}`);
+  let data = await response.json();
+  const jobId = data.jobId;
+  let jobStatus = data.status;
+  while (!jobStatus || jobStatus === 'pending') {
+    await wait(2000);
+    data = await getJobStatus(jobId);
+    jobStatus = data.status;
+  }
+  if (jobStatus === 'complete' && data.results && data.results.length > 0) {
+    appendToTable(data.results);
+  } else {
+    console.error("Unexpected server response:", response);
+  }
+  spinnerRow.style.display = "none";
 }
 
 function sortTable(columnIndex, isAscending) {

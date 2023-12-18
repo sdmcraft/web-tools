@@ -38,9 +38,8 @@ async function filterUrlsWithElement(urls, selector, resultList) {
     // eslint-disable-next-line no-restricted-syntax
     const BATCH_SIZE = 10;
     let promises = {};
-    for (let i = 0; i < urls.length; i++) {
+    for (const url of urls) {
         try {
-            const url = urls[i];
             while (Object.keys(promises).length >= BATCH_SIZE) {
                 await wait(1);
             }
