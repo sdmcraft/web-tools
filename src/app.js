@@ -12,8 +12,6 @@ import serveIndex from 'serve-index';
 import find from './finder.js';
 import { fetchRequestedUrl } from './fetcher.js';
 
-const resultCache = new NodeCache();
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -84,12 +82,8 @@ app.get('/', (req, res) => {
 
 app.get('/lhs', (req, res) => {
   const queryUrl = req.query.queryUrl;
-  if (req.query.useCache === 'true' && resultCache.has(queryUrl)) {
-    res.json(resultCache.get(queryUrl));
-  } else {
-    const jobId = submitLHSJob(queryUrl, req.query.bulk !== 'false');
-    res.status(202).json({ jobId });
-  }
+  const jobId = submitLHSJob(queryUrl);
+  res.status(202).json({ jobId });
 });
 
 // Endpoint to check job status and get results

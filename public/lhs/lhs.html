@@ -1,49 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CSV Scoreboard</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-  <link rel="stylesheet" href="lhs.css">
-</head>
-<body>
-  <h1>LHS Scoreboard</h1>
-  <form id="inputForm">
-    <label for="indexUrl">Enter Index URL:</label>
-    <input type="text" id="indexUrl">
-    <br/>
-    <label for="urlList">Enter URL list:</label>
-    <textarea id="urlList" name="urlList" rows="4"></textarea>
-    <button type="submit">Load LHS Scorecard</button>
-  </form>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSV Scoreboard</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="lhs.css" />
+  </head>
+  <body>
+    <h1>LHS Scoreboard</h1>
+    <form id="inputForm">
+      <label for="urlList">Enter URL list:</label>
+      <textarea id="urlList" name="urlList" rows="4"></textarea>
+      <button type="submit">Load LHS Scorecard</button>
+    </form>
 
-  <button id="downloadCSV">Download CSV</button>
+    <button id="downloadCSV">Download CSV</button>
 
-  <table id="scoreboardTable">
-    <caption>Scoreboard Table</caption>
-    <thead>
-      <tr>
-        <th data-sort="url">URL</th>
-        <th data-sort="performanceScore">Performance Score</th>
-      </tr>
-    </thead>
-    <tbody id="scoreboardBody">
-      <!-- CSV data will be dynamically inserted here -->
-    </tbody>
-    <tbody id="spinnerRow" class="spinner-row">
-      <tr>
-        <td colspan="2" class="centered-cell">
-          <div class="spinner-container">
-            <div class="spinner"></div>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <div class="web-tools-link">
-    <a href="/home.html">For more Web Tools, click here</a>
-  </div>
-  <script src="lhs.js"></script>
-</body>
+    <table id="scoreboardTable">
+      <caption>
+        Scoreboard Table
+      </caption>
+      <thead>
+        <tr>
+          <th data-sort="url">URL</th>
+          <th data-sort="performanceScore">Performance Score</th>
+        </tr>
+      </thead>
+      <tbody id="scoreboardBody">
+        <!-- CSV data will be dynamically inserted here -->
+      </tbody>
+      <tbody id="spinnerRow" class="spinner-row">
+        <tr>
+          <td colspan="2" class="centered-cell">
+            <div class="spinner-container">
+              <div class="spinner"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="web-tools-link">
+      <a href="/home.html">For more Web Tools, click here</a>
+    </div>
+    <script src="lhs.js" type="module"></script>
+  </body>
 </html>

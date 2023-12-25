@@ -1,28 +1,27 @@
+import { BatchProcessor } from "../batch-processor.js";
+import { wait } from "../utils.js";
 const inputForm = document.getElementById("inputForm");
-const indexUrlInput = document.getElementById("indexUrl");
 const urlListInput = document.getElementById("urlList");
 const tableBody = document.getElementById("scoreboardBody");
 
-function wait(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+const BATCH_SIZE = 5;
+const jobProcessor = new BatchProcessor(BATCH_SIZE);
+
+jobProcessor.addEventListener('stateChange', () => {
+  console.log(`Processing state changed.${jobProcessor.isProcessing ? ' Processing...' : ''}`);
+  if (jobProcessor.isProcessing) {
+    document.getElementById("spinnerRow").style.display = "table-row";
+  } else {
+    document.getElementById("spinnerRow").style.display = "none";
+  }
+});
 
 inputForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const indexUrl = indexUrlInput.value.trim();
-
-  if (indexUrl) {
-    await fetchLHS(indexUrl, true);
-  } else if (urlListInput.value) {
-    const urls = urlListInput.value.split('\n');
-    for (const url of urls) {
-      console.log(`Awaiting data for ${url}...`); // eslint-disable-line no-console
-      await fetchLHS(url, false);
-      console.log(`Data received for ${url}`); // eslint-disable-line no-console
-    }
+  const urls = urlListInput.value.split('\n');
+  for (const url of urls) {
+    jobProcessor.addJob(submitLHS, url);
   }
-
-  return void 0;
 });
 
 // Function to check if a URL already exists in the table
@@ -37,53 +36,44 @@ function hasUrlInTable(url) {
   return false;
 }
 
-function appendToTable(data) {
-  data.forEach(item => {
-    if (!hasUrlInTable(item.url)) {
-      const row = document.createElement("tr");
+function appendToTable(item) {
+  if (!hasUrlInTable(item.url)) {
+    const row = document.createElement("tr");
+    const urlCell = document.createElement("td");
+    urlCell.textContent = item.url;
+    row.appendChild(urlCell);
 
-      const urlCell = document.createElement("td");
-      urlCell.textContent = item.url;
-      row.appendChild(urlCell);
+    const performanceScoreCell = document.createElement("td");
+    performanceScoreCell.textContent = item.performanceScore;
+    row.appendChild(performanceScoreCell);
 
-      const performanceScoreCell = document.createElement("td");
-      performanceScoreCell.textContent = item.performanceScore;
-      row.appendChild(performanceScoreCell);
-
-      tableBody.appendChild(row);
-    }
-  });
+    tableBody.appendChild(row);
+  }
 }
 
 async function getJobStatus(jobId) {
   const response = await fetch(`/lhs/${jobId}`);
   if (response.status === 200) {
     const data = await response.json();
-    return data;
-  } else {
-    return null;
-  }
-}
-
-async function fetchLHS(url, isBulk = true) {
-  const spinnerRow = document.getElementById("spinnerRow");
-  spinnerRow.style.display = "table-row";
-
-  let response = await fetch(`/lhs?queryUrl=${url}&bulk=${isBulk}`);
-  let data = await response.json();
-  const jobId = data.jobId;
-  let jobStatus = data.status;
-  while (!jobStatus || jobStatus === 'pending') {
-    await wait(2000);
-    data = await getJobStatus(jobId);
-    jobStatus = data.status;
-  }
-  if (jobStatus === 'complete' && data.results && data.results.length > 0) {
-    appendToTable(data.results);
+    const jobStatus = data.status;
+    if (jobStatus === 'pending') {
+      await wait(5000);
+      jobProcessor.addJob(getJobStatus, jobId);
+    } else if (jobStatus === 'complete') {
+      appendToTable(data.result);
+    } else {
+      console.error("Unexpected server response:", response);
+    }
   } else {
     console.error("Unexpected server response:", response);
   }
-  spinnerRow.style.display = "none";
+}
+
+async function submitLHS(url) {
+  let response = await fetch(`/lhs?queryUrl=${url}`);
+  let data = await response.json();
+  const jobId = data.jobId;
+  jobProcessor.addJob(getJobStatus, jobId);
 }
 
 function sortTable(columnIndex, isAscending) {

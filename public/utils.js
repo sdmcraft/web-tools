@@ -25,3 +25,8 @@ export async function fetchHtml(url) {
   const doc = parser.parseFromString(html, 'text/html');
   return doc;
 }
+
+// A function to wait for a specified number of milliseconds
+export function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
