@@ -9,12 +9,16 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
     />
     <link rel="stylesheet" href="lhs.css" />
+    <script src="lhs.js" type="module"></script>
+    <script src="../gauge.js" type="module"></script>
   </head>
   <body>
     <h1>LHS Scoreboard</h1>
     <form id="inputForm">
       <label for="urlList">Enter URL list:</label>
       <textarea id="urlList" name="urlList" rows="4"></textarea>
+      <label for="compareDomain">Compare With Domain:</label>
+      <input type="text" id="compareDomain" name="compareDomain" />
       <button type="submit">Load LHS Scorecard</button>
     </form>
 
@@ -28,6 +32,8 @@
         <tr>
           <th data-sort="url">URL</th>
           <th data-sort="performanceScore">Performance Score</th>
+          <th data-sort="performanceScoreCompareDomain">Performance Score (Compare Domain)</th>
+          <th data-sort="gauge">Gain</th>
         </tr>
       </thead>
       <tbody id="scoreboardBody">
@@ -46,6 +52,5 @@
     <div class="web-tools-link">
       <a href="/home.html">For more Web Tools, click here</a>
     </div>
-    <script src="lhs.js" type="module"></script>
   </body>
 </html>

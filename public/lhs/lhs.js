@@ -3,6 +3,7 @@ import { wait } from "../utils.js";
 const inputForm = document.getElementById("inputForm");
 const urlListInput = document.getElementById("urlList");
 const tableBody = document.getElementById("scoreboardBody");
+const compareDomainInput = document.getElementById("compareDomain");
 
 const BATCH_SIZE = 5;
 const jobProcessor = new BatchProcessor(BATCH_SIZE);
@@ -21,23 +22,47 @@ inputForm.addEventListener("submit", async (event) => {
   const urls = urlListInput.value.split('\n');
   for (const url of urls) {
     jobProcessor.addJob(submitLHS, url);
+    if (compareDomainInput.value) {
+      const compareUrl = new URL(url);
+      compareUrl.hostname = compareDomainInput.value;
+      jobProcessor.addJob(submitLHS, compareUrl.href);
+    }
   }
 });
 
 // Function to check if a URL already exists in the table
-function hasUrlInTable(url) {
+function hasUrlInTable(urlStr) {
+  const url = new URL(urlStr);
   const tableRows = tableBody.querySelectorAll("tr");
   for (const row of tableRows) {
-    const rowUrl = row.cells[0].textContent;
-    if (rowUrl === url) {
-      return true;
+    const rowUrl = new URL(row.cells[0].textContent);
+    if (rowUrl.pathname === url.pathname) {
+      return row;
     }
   }
-  return false;
+  return null;
 }
 
 function appendToTable(item) {
-  if (!hasUrlInTable(item.url)) {
+  const row = hasUrlInTable(item.url);
+  if (row) {
+    const rowUrl = new URL(row.cells[0].textContent);
+    const itemUrl = new URL(item.url);
+    if (rowUrl.hostname !== itemUrl.hostname) {
+      const compareCell = document.createElement("td");
+      const gauge = document.createElement("gauge-widget");
+      if (compareDomainInput.value === itemUrl.hostname) {
+        gauge.setAttribute("value", row.cells[1].textContent - item.performanceScore);
+      } else {
+        gauge.setAttribute("value", item.performanceScore - row.cells[1].textContent);
+      }
+      compareCell.textContent = item.performanceScore;
+      row.appendChild(compareCell);
+      const gaugeCell = document.createElement("td");
+      gaugeCell.appendChild(gauge);
+      row.appendChild(gaugeCell);
+    }
+  } else {
     const row = document.createElement("tr");
     const urlCell = document.createElement("td");
     urlCell.textContent = item.url;
@@ -49,6 +74,7 @@ function appendToTable(item) {
 
     tableBody.appendChild(row);
   }
+
 }
 
 async function getJobStatus(jobId) {

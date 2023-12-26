@@ -1,16 +1,20 @@
 import NodeCache from 'node-cache';
 import { v4 as uuidv4 } from 'uuid';
 import psi from 'psi';
+import { getFinalUrl } from './utils.js';
 
 const jobCache = new NodeCache();
 async function computeLHSWithRetry(url, maxAttempts = 2, minScoreThreshold = 95) {
+  if (!url) {
+    console.error('URL is required');
+    return null;
+  }
   console.log('Computing LHS with retry for:', url);
-
   let attempts = 0;
   let perfScore = 0;
-
+  let testUrl = await getFinalUrl(url) || url;
+  testUrl = `${testUrl}${testUrl.includes('?') ? '&' : '?'}ck=${Math.random()}`;
   while (attempts < maxAttempts) {
-    let testUrl = `${url}${url.includes('?') ? '&' : '?'}ck=${Math.random()}`;
     try {
       attempts++;
       console.log(`Computing LHS for ${testUrl}. Attempt ${attempts} of ${maxAttempts}`);
@@ -43,7 +47,7 @@ async function computeLHSWithRetry(url, maxAttempts = 2, minScoreThreshold = 95)
 async function buildLHSScoreboard(queryUrl, jobId) {
   const job = jobCache.get(jobId);
   const result = await computeLHSWithRetry(queryUrl);
-  job.result = result;
+  job.result = result ?? {};
   job.status = 'complete';
   jobCache.set(jobId, job);
 }
