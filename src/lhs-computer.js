@@ -2,6 +2,7 @@ import NodeCache from 'node-cache';
 import { v4 as uuidv4 } from 'uuid';
 import psi from 'psi';
 import { getFinalUrl } from './utils.js';
+import { wait } from '../public/utils.js';
 
 const jobCache = new NodeCache();
 async function computeLHSWithRetry(url, maxAttempts = 2, minScoreThreshold = 95) {
@@ -33,6 +34,7 @@ async function computeLHSWithRetry(url, maxAttempts = 2, minScoreThreshold = 95)
         }
       } catch (e) {
         console.error(`Error computing LHS for ${testUrl}`, e);
+        wait(5000);
       }
     }
   }

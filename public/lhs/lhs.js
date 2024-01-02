@@ -71,60 +71,68 @@ function hasUrlInTable(urlStr) {
 }
 
 function updateTable(item) {
-  let row = hasUrlInTable(item.url);
-  let urlCell, gaugeCell, perfScoreCell, refPerfScoreCell;
-  if (!row) {
-    row = document.createElement("tr");
-
-    urlCell = document.createElement("td");
-    urlCell.setAttribute("data-url", '');
-    urlCell.innerHTML = SPINNER;
-    row.appendChild(urlCell);
-
-    perfScoreCell = document.createElement("td");
-    perfScoreCell.setAttribute("data-perf-score", '');
-    perfScoreCell.innerHTML = SPINNER;
-    row.appendChild(perfScoreCell);
-
-    refPerfScoreCell = document.createElement("td");
-    refPerfScoreCell.setAttribute("data-ref-perf-score", '');
-    refPerfScoreCell.innerHTML = SPINNER;
-    row.appendChild(refPerfScoreCell);
-
-    gaugeCell = document.createElement("td");
-    gaugeCell.setAttribute("data-gauge", '');
-    gaugeCell.innerHTML = SPINNER;
-    row.appendChild(gaugeCell);
-
-    tableBody.appendChild(row);
-  } else {
-    urlCell = row.querySelector("td[data-url]");
-    gaugeCell = row.querySelector("td[data-gauge]");
-    perfScoreCell = row.querySelector("td[data-perf-score]");
-    refPerfScoreCell = row.querySelector("td[data-ref-perf-score]");
-  }
-
   if (item.url) {
-    urlCell.textContent = item.url;
-    urlCell.setAttribute("data-url", item.url);
-  }
+    try {
+      let row = hasUrlInTable(item.url);
+      let urlCell, gaugeCell, perfScoreCell, refPerfScoreCell;
+      if (!row) {
+        row = document.createElement("tr");
 
-  if (item.perfScore) {
-    perfScoreCell.textContent = item.perfScore;
-    perfScoreCell.setAttribute("data-perf-score", item.perfScore);
-  }
+        urlCell = document.createElement("td");
+        urlCell.setAttribute("data-url", '');
+        urlCell.innerHTML = SPINNER;
+        row.appendChild(urlCell);
 
-  if (item.refPerfScore) {
-    refPerfScoreCell.textContent = item.refPerfScore;
-    refPerfScoreCell.setAttribute("data-ref-perf-score", item.refPerfScore);
-  }
+        perfScoreCell = document.createElement("td");
+        perfScoreCell.setAttribute("data-perf-score", '');
+        perfScoreCell.innerHTML = SPINNER;
+        row.appendChild(perfScoreCell);
 
-  if (isFinite(item.perfScore) && isFinite(item.refPerfScore)) {
-    const diffValue = item.perfScore - item.refPerfScore;
-    const gauge = document.createElement("gauge-widget");
-    gauge.setAttribute("value", diffValue);
-    gaugeCell.innerHTML = '';
-    gaugeCell.appendChild(gauge);
+        refPerfScoreCell = document.createElement("td");
+        refPerfScoreCell.setAttribute("data-ref-perf-score", '');
+        refPerfScoreCell.innerHTML = SPINNER;
+        row.appendChild(refPerfScoreCell);
+
+        gaugeCell = document.createElement("td");
+        gaugeCell.setAttribute("data-gauge", '');
+        gaugeCell.innerHTML = SPINNER;
+        row.appendChild(gaugeCell);
+
+        tableBody.appendChild(row);
+      } else {
+        urlCell = row.querySelector("td[data-url]");
+        gaugeCell = row.querySelector("td[data-gauge]");
+        perfScoreCell = row.querySelector("td[data-perf-score]");
+        refPerfScoreCell = row.querySelector("td[data-ref-perf-score]");
+      }
+
+      if (item.url) {
+        urlCell.textContent = item.url;
+        urlCell.setAttribute("data-url", item.url);
+      }
+
+      if (item.perfScore) {
+        perfScoreCell.textContent = item.perfScore;
+        perfScoreCell.setAttribute("data-perf-score", item.perfScore);
+      }
+
+      if (item.refPerfScore) {
+        refPerfScoreCell.textContent = item.refPerfScore;
+        refPerfScoreCell.setAttribute("data-ref-perf-score", item.refPerfScore);
+      }
+
+      if (isFinite(item.perfScore) && isFinite(item.refPerfScore)) {
+        const diffValue = item.perfScore - item.refPerfScore;
+        const gauge = document.createElement("gauge-widget");
+        gauge.setAttribute("value", diffValue);
+        gaugeCell.innerHTML = '';
+        gaugeCell.appendChild(gauge);
+      }
+    } catch (e) {
+      console.error(`Unable to update table for ${item.url}`, e);
+    }
+  } else {
+    console.error("Invalid item:", item);
   }
 }
 
@@ -151,12 +159,12 @@ function handleResult(result) {
   const perfScore = result.performanceScore;
   const resUrl = translateUrl(result.url);
   const infoObj = results[resUrl] || {};
+  infoObj['url'] = resUrl;
   if (resUrl !== result.url) {
     infoObj['refPerfScore'] = perfScore;
     infoObj['refUrl'] = result.url;
   } else {
     infoObj['perfScore'] = perfScore;
-    infoObj['url'] = result.url;
     summary['processedURLs'] = (summary['processedURLs'] || 0) + 1;
   }
   if (isFinite(infoObj['perfScore']) && isFinite(infoObj['refPerfScore'])) {
@@ -168,6 +176,8 @@ function handleResult(result) {
     }
     summary['totalGains'] = (summary['totalGains'] || 0) + diffValue;
     summary['averageGains'] = (summary['totalGains'] / summary['processedURLs']).toFixed(2);
+  } else if (infoObj['perfScore'] === 'NA' && infoObj['refPerfScore'] === 'NA') {
+    summary['invalidURLs'] = (summary['invalidURLs'] || 0) + 1;
   }
   results[resUrl] = infoObj;
   updateTable(infoObj);
