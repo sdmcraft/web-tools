@@ -3,7 +3,6 @@ import render from './render.js';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import NodeCache from 'node-cache';
 import cors from 'cors';
 import fs from 'fs/promises';
 import bodyParser from "body-parser";
@@ -11,6 +10,7 @@ import { compare, status } from './visual-compare.js';
 import serveIndex from 'serve-index';
 import find from './finder.js';
 import { fetchRequestedUrl } from './fetcher.js';
+import { getUrlList } from './franklin/url-list.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -191,6 +191,21 @@ app.get('/browse', (req, res) => {
 
     res.send(html);
   });
+});
+
+app.get('/franklin/url-list', async (req, res) => {
+  const indexUrl = req.query.indexUrl;
+  if (!indexUrl) {
+    return res.status(400).send('Please provide a valid "indexUrl" parameter.');
+  }
+
+  try {
+    const urls = await getUrlList(indexUrl);
+    res.json(urls);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send('Error fetching URLs.');
+  }
 });
 
 

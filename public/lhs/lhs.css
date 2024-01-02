@@ -16,7 +16,7 @@ dd {
 }
 
 body {
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   line-height: 1.6;
   color: #333;
   margin: 20px; /* Added margin to the body */
@@ -119,8 +119,12 @@ td {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .web-tools-link {
@@ -134,4 +138,21 @@ td {
 
 .web-tools-link a:hover {
   text-decoration: underline;
+}
+
+#summary-container {
+  text-align: center;
+  padding: 30px;
+}
+
+#performanceImprovedURLs,
+#totalGains,
+#averageGains {
+  color: #28a745;
+  font-weight: bold;
+}
+
+#performanceDeclinedURLs {
+  color: #dc3545;
+  font-weight: bold;
 }

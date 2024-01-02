@@ -12,26 +12,28 @@ async function computeLHSWithRetry(url, maxAttempts = 2, minScoreThreshold = 95)
   console.log('Computing LHS with retry for:', url);
   let attempts = 0;
   let perfScore = 0;
-  let testUrl = await getFinalUrl(url) || url;
-  testUrl = `${testUrl}${testUrl.includes('?') ? '&' : '?'}ck=${Math.random()}`;
-  while (attempts < maxAttempts) {
-    try {
-      attempts++;
-      console.log(`Computing LHS for ${testUrl}. Attempt ${attempts} of ${maxAttempts}`);
-      await psi(testUrl, { nokey: 'true', strategy: 'mobile' });
-      const { data } = await psi(testUrl, { nokey: 'true', strategy: 'mobile' });
-      perfScore = data.lighthouseResult.categories.performance.score * 100;
+  let testUrl = await getFinalUrl(url);
+  if (testUrl) {
+    testUrl = `${testUrl}${testUrl.includes('?') ? '&' : '?'}ck=${Math.random()}`;
+    while (attempts < maxAttempts) {
+      try {
+        attempts++;
+        console.log(`Computing LHS for ${testUrl}. Attempt ${attempts} of ${maxAttempts}`);
+        await psi(testUrl, { nokey: 'true', strategy: 'mobile' });
+        const { data } = await psi(testUrl, { nokey: 'true', strategy: 'mobile' });
+        perfScore = data.lighthouseResult.categories.performance.score * 100;
 
-      if (perfScore >= minScoreThreshold) {
-        console.log(`Score ${perfScore} is more than or equal to threshold ${minScoreThreshold}.`);
-        break; // Stop retrying if score meets the threshold
-      } else if (attempts < maxAttempts) {
-        //wait for 5 seconds before retrying
-        console.log(`Score ${perfScore} is less than threshold ${minScoreThreshold}. Retrying.`);
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        if (perfScore >= minScoreThreshold) {
+          console.log(`Score ${perfScore} is more than or equal to threshold ${minScoreThreshold}.`);
+          break; // Stop retrying if score meets the threshold
+        } else if (attempts < maxAttempts) {
+          //wait for 5 seconds before retrying
+          console.log(`Score ${perfScore} is less than threshold ${minScoreThreshold}. Retrying.`);
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+        }
+      } catch (e) {
+        console.error(`Error computing LHS for ${testUrl}`, e);
       }
-    } catch (e) {
-      console.error(`Error computing LHS for ${testUrl}`, e);
     }
   }
 

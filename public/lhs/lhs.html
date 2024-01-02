@@ -9,6 +9,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
     />
     <link rel="stylesheet" href="lhs.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="lhs.js" type="module"></script>
     <script src="../gauge.js" type="module"></script>
   </head>
@@ -23,6 +24,21 @@
     </form>
 
     <button id="downloadCSV">Download CSV</button>
+    <div id="summary-container">
+      Total URLs: <span id="totalURLs">0</span>
+      <br />
+      Processed URLs: <span id="processedURLs">0</span>
+      <br />
+      Performance Improved URLs: <span id="performanceImprovedURLs">0</span>
+      <br />
+      Performance Declined URLs: <span id="performanceDeclinedURLs">0</span>
+      <br />
+      Invalid URLs: <span id="invalidURLs">0</span>
+      <br />
+      Total Gains: <span id="totalGains">0</span>
+      <br />
+      Average Gain Per URL: <span id="averageGains">0</span>
+    </div>
 
     <table id="scoreboardTable">
       <caption>
@@ -32,7 +48,9 @@
         <tr>
           <th data-sort="url">URL</th>
           <th data-sort="performanceScore">Performance Score</th>
-          <th data-sort="performanceScoreCompareDomain">Performance Score (Compare Domain)</th>
+          <th data-sort="performanceScoreCompareDomain">
+            Performance Score (Compare Domain)
+          </th>
           <th data-sort="gauge">Gain</th>
         </tr>
       </thead>
