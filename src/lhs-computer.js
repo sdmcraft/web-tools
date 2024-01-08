@@ -5,7 +5,7 @@ import { getFinalUrl } from './utils.js';
 import { wait } from '../public/utils.js';
 
 const jobCache = new NodeCache();
-async function computeLHSWithRetry(url, maxAttempts = 2, minScoreThreshold = 95) {
+async function computeLHSWithRetry(url, maxAttempts = 5, minScoreThreshold = 90) {
   if (!url) {
     console.error('URL is required');
     return null;
@@ -34,7 +34,7 @@ async function computeLHSWithRetry(url, maxAttempts = 2, minScoreThreshold = 95)
         }
       } catch (e) {
         console.error(`Error computing LHS for ${testUrl}`, e);
-        wait(5000);
+        await wait(5000);
       }
     }
   }

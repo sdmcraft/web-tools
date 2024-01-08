@@ -9,7 +9,7 @@ let compareHostname;
 const SPINNER = '<i class="fa fa-cog fa-spin" style="font-size:24px"></i>';
 let hostname;
 
-const BATCH_SIZE = 5;
+const BATCH_SIZE = 2;
 const jobProcessor = new BatchProcessor(BATCH_SIZE);
 
 jobProcessor.addEventListener('stateChange', () => {
@@ -47,6 +47,7 @@ inputForm.addEventListener("submit", async (event) => {
         hostname = urlObj.hostname;
       }
       document.getElementById("totalURLs").textContent++;
+      await wait(5000);
       jobProcessor.addJob(submitLHS, url);
       if (compareHostname) {
         const compareUrl = new URL(url);
