@@ -1,7 +1,7 @@
 # Tool to find LHS for all indexed pages in a site
 
 ## Introduction
-For computing the LHS score for all the indexed pages in the site.
+For computing the LHS score for specified list of URLs and do a comparison with the LCP score for the same URLs from another domain.
 
 ### How to use
 1. Install [Docker](https://docs.docker.com/get-docker/)
