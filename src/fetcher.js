@@ -162,7 +162,6 @@ export async function fetchUrl(srcUrl) {
 }
 
 export async function fetchRequestedUrl(req, res) {
-    debugger;
     const srcUrl = req.query.src;
     if (!srcUrl) {
         res.status(400).send('You must provide a src URL');

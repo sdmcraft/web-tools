@@ -8,22 +8,24 @@ let startDomain = '';
 document.getElementById('crawlerForm').addEventListener('submit', async function (event) {
   event.preventDefault();
 
-  const startUrl = document.getElementById('startUrl').value;
+  const startUrls = document.getElementById('startUrls').value;
   const omitPatternVal = document.getElementById('omitPatterns').value;
   let omitPatterns;
   if (omitPatternVal) {
     omitPatterns = document.getElementById('omitPatterns').value.split(',').map(pattern => pattern.trim());
   }
-  if (startUrl) {
-    showSpinner();
-    crawlingCompleteMessage.style.display = 'none';
-    startDomain = new URL(startUrl).hostname;
-    console.log('Starting crawl process for:', startUrl);
-    const reportExternalLinks = document.getElementById('reportExternalLinks').checked;
-    await crawlWithStartUrl(startUrl, omitPatterns, reportExternalLinks);
-    hideSpinner();
-    crawlingCompleteMessage.style.display = 'block';
-    console.log('Crawl process completed.');
+  for (const startUrl of startUrls.split('\n')) {
+    if (startUrl) {
+      showSpinner();
+      crawlingCompleteMessage.style.display = 'none';
+      startDomain = new URL(startUrl).hostname;
+      console.log('Starting crawl process for:', startUrl);
+      const reportExternalLinks = document.getElementById('reportExternalLinks').checked;
+      await crawlWithStartUrl(startUrl, omitPatterns, reportExternalLinks);
+      hideSpinner();
+      crawlingCompleteMessage.style.display = 'block';
+      console.log('Crawl process completed.');
+    }
   }
 });
 
@@ -86,7 +88,7 @@ async function crawlWebsite(src, parentUrl, omitPatterns, reportExternalLinks = 
               absoluteUrl = absoluteUrl.slice(0, -1);
             }
             const hostname = new URL(absoluteUrl).hostname;
-            if(hostname !== startDomain) {
+            if (hostname !== startDomain) {
               if (reportExternalLinks) {
                 addUrlToTable(absoluteUrl, src, 'External link');
               }
