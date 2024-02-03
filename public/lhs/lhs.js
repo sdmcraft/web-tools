@@ -190,7 +190,7 @@ async function getJobStatus(jobId) {
   if (response.status === 200) {
     const data = await response.json();
     const jobStatus = data.status;
-    if (jobStatus === 'pending') {
+    if (jobStatus === 'pending' || jobStatus === 'processing') {
       await wait(5000);
       jobProcessor.addJob(getJobStatus, jobId);
     } else if (jobStatus === 'complete') {

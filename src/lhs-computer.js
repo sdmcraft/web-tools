@@ -4,8 +4,10 @@ import psi from 'psi';
 import { getFinalUrl } from './utils.js';
 import { wait } from '../public/utils.js';
 
+const PSI_KEY = process.env.psikey;
+
 const jobCache = new NodeCache();
-async function computeLHSWithRetry(url, maxAttempts = 5, minScoreThreshold = 90) {
+async function computeLHSWithRetry(url, maxAttempts = 3, minScoreThreshold = 90) {
   if (!url) {
     console.error('URL is required');
     return null;
@@ -20,7 +22,13 @@ async function computeLHSWithRetry(url, maxAttempts = 5, minScoreThreshold = 90)
       try {
         attempts++;
         console.log(`Computing LHS for ${testUrl}. Attempt ${attempts} of ${maxAttempts}`);
-        await psi(testUrl, { nokey: 'true', strategy: 'mobile' });
+        if (PSI_KEY) {
+          await psi(testUrl, { key: PSI_KEY, strategy: 'mobile' });
+        }
+        else {
+          await psi(testUrl, { nokey: 'true', strategy: 'mobile' });
+        }
+
         const { data } = await psi(testUrl, { nokey: 'true', strategy: 'mobile' });
         perfScore = data.lighthouseResult.categories.performance.score * 100;
 
@@ -48,12 +56,23 @@ async function computeLHSWithRetry(url, maxAttempts = 5, minScoreThreshold = 90)
   console.log(JSON.stringify(result, null, 2));
   return result;
 }
-async function buildLHSScoreboard(queryUrl, jobId) {
+async function buildLHSScoreboard(queryUrl, jobId, wainInterval = 5000) {
+  while (jobsInProcess().length > 5) {
+    console.log(`Too many jobs in process. Waiting for ${wainInterval} ms.`);
+    await wait(wainInterval);
+  }
+
   const job = jobCache.get(jobId);
+  job.status = 'processing';
+  jobCache.set(jobId, job);
   const result = await computeLHSWithRetry(queryUrl);
   job.result = result ?? {};
   job.status = 'complete';
   jobCache.set(jobId, job);
+}
+
+function jobsInProcess() {
+  return jobCache.keys().filter((key) => jobCache.get(key).status === 'processing');
 }
 
 export function submitLHSJob(queryUrl) {

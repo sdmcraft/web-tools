@@ -91,7 +91,7 @@ async function renderPage(srcUrl) {
         try {
             const page = await browser.newPage();
 
-            await page.goto(srcUrl, { waitUntil: 'networkidle', timeout: 10000 }); // 10 seconds timeout
+            await page.goto(srcUrl, { waitUntil: 'networkidle', timeout: 30000}); // 30 seconds timeout
             //console.log(`Status code: ${response.status()} for ${srcUrl}`);
 
             // You can adjust the waiting time based on your needs
@@ -119,7 +119,7 @@ async function renderPage(srcUrl) {
     }
 
     console.error(`Max retries reached. Unable to render the page.`);
-    throw new Error('Navigation timeout');
+    return;
 }
 
 export async function fetchUrl(srcUrl) {
@@ -155,8 +155,10 @@ export async function fetchUrl(srcUrl) {
     }
     if (result.contentType?.trim().toLowerCase().includes('text/html')) {
         result.responseData = await renderPage(srcUrl);
-        resultCache.set(convertUrlToFilename(srcUrl), result.responseData);
-        writeToFileSync(diskCache, convertUrlToFilename(srcUrl), result.responseData);
+        if (result.responseData) {
+            resultCache.set(convertUrlToFilename(srcUrl), result.responseData);
+            writeToFileSync(diskCache, convertUrlToFilename(srcUrl), result.responseData);
+        }
     }
     return result;
 }
