@@ -5,7 +5,7 @@ For computing the LHS score for specified list of URLs and do a comparison with 
 
 ### How to use
 1. Install [Docker](https://docs.docker.com/get-docker/)
-2. Run `docker run -p 3001:3001 -e psikey=<optional-psi-key> satyadeepm/web-tools:latest`
+2. Run `docker run -d -p 3001:3001 -e psikey=<optional-psi-key> satyadeepm/web-tools:latest`
 3. OR if you don't want to use Docker, just synch this repository and execute the following:
     ```
     $ npm i

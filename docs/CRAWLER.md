@@ -7,7 +7,7 @@ A simple web-crawler which can be used to crawl a website and download the marku
 
 ### How to use
 1. Install [Docker](https://docs.docker.com/get-docker/)
-2. Run `docker run -p 3001:3001 -v <Download folder on host>:/usr/src/app/cache satyadeepm/web-tools:latest`
+2. Run `docker run -d -p 3001:3001 -v <Download folder on host>:/usr/src/app/cache satyadeepm/web-tools:latest`
 3. OR if you don't want to use Docker, just synch this repository and execute the following:
     ```
     $ npm i

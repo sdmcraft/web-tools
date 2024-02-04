@@ -4,7 +4,7 @@ A collection of handy tools to aid website development.
 # How to use
 ## Option 1: Docker
 1. Install [Docker](https://docs.docker.com/get-docker/)
-2. Run `docker run -p 3001:3001 -v <Download folder on host>:/usr/src/app/cache -e psikey=<optonal-psi-key> satyadeepm/web-tools:latest`
+2. Run `docker run -d -p 3001:3001 -v <Download folder on host>:/usr/src/app/cache -e psikey=<optonal-psi-key> satyadeepm/web-tools:latest`
 3. Open `http://localhost:3001/home.html` in your browser.
 
 That's it! :tada:
