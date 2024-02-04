@@ -90,13 +90,8 @@ async function renderPage(srcUrl) {
         const browser = await chromium.launch();
         try {
             const page = await browser.newPage();
-
-            await page.goto(srcUrl, { waitUntil: 'networkidle', timeout: 30000}); // 30 seconds timeout
-            //console.log(`Status code: ${response.status()} for ${srcUrl}`);
-
-            // You can adjust the waiting time based on your needs
-            await page.waitForTimeout(2000);
-
+            await page.goto(srcUrl);
+            await page.waitForTimeout(5000);
             // Remove all script tags
             await page.evaluate(() => {
                 const scripts = document.querySelectorAll('script');

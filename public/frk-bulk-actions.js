@@ -12,11 +12,11 @@ function declareVariableIfNotExists(variableName) {
 }
 
 declareVariableIfNotExists('frkActions');
-frkActions = ['list', 'preview', 'live'];
-declareVariableIfNotExists('count');
-count = 0;
+const frkActions = ['list', 'preview', 'live'];
+//declareVariableIfNotExists('count');
+let count = 0;
 declareVariableIfNotExists('MAX_COUNT');
-MAX_COUNT = 10000;
+const MAX_COUNT = 10000;
 
 function parseURL(url) {
   const regex = /^https:\/\/([\w-]+)--([\w-]+)--([\w-]+)\.hlx\.page\/([\w\/-]+(\.\w+)?)$/;
@@ -55,7 +55,7 @@ async function traverseCurrentFolder() {
   const URLs = [];
   const [prefix] = window.location.href.split('/Shared%20Documents/');
   const usp = new URLSearchParams(window.location.search);
-  const rootPath = usp.get('id').split('/Shared Documents')[1];
+  const rootPath = usp.get('id') ?? (usp.get('RootFolder') ?? '').split('/Shared Documents')[1];
   const omittedItems = window.omitFolders.split(',').map(item => item.trim()) || [];
   omittedItems.push('import-report.xlsx');
   omittedItems.push('query-index.xlsx');

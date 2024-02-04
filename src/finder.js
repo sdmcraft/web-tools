@@ -4,7 +4,7 @@ import { fetchUrl } from './fetcher.js';
 export default async function find(srcUrl, selector) {
     console.log(`Finding ${selector} in ${srcUrl}`);
     const result = await fetchUrl(srcUrl);
-    if (result.contentType !== 'text/html') {
+    if (!result.contentType.includes('text/html')) {
         return false;
     } else if (selector.startsWith('"') && selector.endsWith('"')) {
         const searchText = selector.substring(1, selector.length - 1);
