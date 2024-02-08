@@ -24,3 +24,5 @@ https://main--sunstar-foundation--hlxsites.hlx.live/award
 ![Local Image](images/site-lhs.png)
 8. The report will be generated and displayed in the browser.
 9. You can also download the report as a CSV file or print it as a PDF.
+
+![Local Image](images/site-lhs-2.png)
