@@ -38,6 +38,8 @@ inputForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   reset();
   compareHostname = document.getElementById("compareDomain").value;
+  // Remove http/https from compareHostname
+  compareHostname = compareHostname.replace(/^https?:\/\//, '');
   const urls = urlListInput.value.split('\n');
   for (const url of urls) {
     if (url) {
