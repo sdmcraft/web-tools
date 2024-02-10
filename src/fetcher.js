@@ -4,6 +4,7 @@ import cheerio from 'cheerio';
 import { URL } from 'url';
 import fs from 'fs';
 import path from 'path';
+import https from 'https';
 
 const resultCache = new NodeCache();
 const diskCache = process.env.cache ?? 'cache';
@@ -88,8 +89,9 @@ async function renderPage(srcUrl) {
 
     while (retries < maxRetries) {
         const browser = await chromium.launch();
+        const context = await browser.newContext({ ignoreHTTPSErrors: true });
         try {
-            const page = await browser.newPage();
+            const page = await context.newPage();
             await page.goto(srcUrl);
             await page.waitForTimeout(5000);
             // Remove all script tags
@@ -130,9 +132,13 @@ export async function fetchUrl(srcUrl) {
         return { responseData: savedResult, contentType: 'text/html' };
     }
     const result = {};
+    const httpsAgent = new https.Agent({
+        rejectUnauthorized: false,
+    });
     const response = await fetch(srcUrl, {
         method: 'GET',
         redirect: 'manual',
+        agent: httpsAgent,
     });
     result.responseData = await response.text();
     result.contentType = response.headers.get('content-type');

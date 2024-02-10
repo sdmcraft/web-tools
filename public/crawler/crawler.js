@@ -1,13 +1,20 @@
-const urlTable = document.getElementById('urlTable');
+const urlTable = document.querySelector('table#urlTable > tbody');
 const spinnerContainer = document.getElementById('spinnerContainer');
 const crawlingCompleteMessage = document.getElementById('crawlingCompleteMessage');
 const urlCountElement = document.getElementById('urlCount');
 const visitedUrls = new Set();
 let startDomain = '';
 
+function reset() {
+  crawlingCompleteMessage.innerHTML = '';
+  urlTable.innerHTML = '';
+  urlCountElement.textContent = '0';
+  visitedUrls.clear();
+}
+
 document.getElementById('crawlerForm').addEventListener('submit', async function (event) {
   event.preventDefault();
-
+  reset();
   const startUrls = document.getElementById('startUrls').value;
   const omitPatternVal = document.getElementById('omitPatterns').value;
   let omitPatterns;
@@ -142,7 +149,7 @@ function addUrlToTable(url, parentUrl, status, note = '') {
 }
 
 function updateUrlCount() {
-  const rowCount = urlTable.rows.length - 1;
+  const rowCount = urlTable.rows.length;
   urlCountElement.textContent = rowCount;
 }
 
