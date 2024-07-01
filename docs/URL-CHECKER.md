@@ -14,7 +14,5 @@ For checking HTTP response code of URLs in bulk
     $ node app.js
     ```
 5. Open `http://localhost:3001/check-urls.html` in your browser.
-6. Provide inputs
-![Local Image](images/visual-compare-1.png)
-7. Review the screenshots
-![Local Image](images/visual-compare-2.png)
+6. Provide the list of URLs and click "Check URLs"
+![Local Image](images/url-check.png)
