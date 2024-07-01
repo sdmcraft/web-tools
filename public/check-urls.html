@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Status Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        .status-2xx, .status-3xx {
+            background-color: #d4edda;
+        }
+        .status-4xx, .status-5xx {
+            background-color: #f8d7da;
+        }
+    </style>
+</head>
+<body>
+    <h1>URL Status Checker</h1>
+    <textarea id="urlInput" rows="10" style="width: 100%;" placeholder="Enter URLs, one per line"></textarea>
+    <br>
+    <button onclick="checkUrls()">Check URLs</button>
+
+    <div id="summary">
+        <p>Total URLs: <span id="totalCount">0</span></p>
+        <p>2xx and 3xx: <span id="successCount">0</span></p>
+        <p>4xx and 5xx: <span id="errorCount">0</span></p>
+        <p>Errors: <span id="errorTotalCount">0</span></p>
+    </div>
+
+    <table id="resultTable">
+        <thead>
+            <tr>
+                <th>URL</th>
+                <th onclick="sortTable(1)">Status Code</th>
+                <th>Redirect Location</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        let totalCount = 0;
+        let successCount = 0;
+        let errorCount = 0;
+        let errorTotalCount = 0;
+
+        async function checkUrl(url) {
+            const response = await fetch('/check-url', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url })
+            });
+
+            return response.json();
+        }
+
+        async function checkUrls() {
+            const urls = document.getElementById('urlInput').value.trim().split('\n');
+            const resultTable = document.getElementById('resultTable').getElementsByTagName('tbody')[0];
+            totalCount = urls.length;
+
+            updateSummary();
+
+            resultTable.innerHTML = '';
+
+            for (const url of urls) {
+                try {
+                    const result = await checkUrl(url);
+
+                    const row = resultTable.insertRow();
+                    row.className = `status-${Math.floor(result.status / 100)}xx`;
+
+                    const cellUrl = row.insertCell(0);
+                    const cellStatus = row.insertCell(1);
+                    const cellRedirect = row.insertCell(2);
+
+                    cellUrl.innerHTML = `<a href="${result.url}" target="_blank">${result.url}</a>`;
+                    cellStatus.textContent = result.status;
+                    cellRedirect.textContent = result.redirectLocation;
+
+                    if (result.status >= 200 && result.status < 400) {
+                        successCount++;
+                    } else if (result.status >= 400) {
+                        errorCount++;
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+
+                    const row = resultTable.insertRow();
+                    row.className = 'status-error';
+
+                    const cellUrl = row.insertCell(0);
+                    const cellStatus = row.insertCell(1);
+                    const cellRedirect = row.insertCell(2);
+
+                    cellUrl.innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
+                    cellStatus.textContent = 'Error';
+                    cellRedirect.textContent = 'N/A';
+
+                    errorTotalCount++;
+                }
+
+                updateSummary();
+            }
+        }
+
+        function updateSummary() {
+            document.getElementById('totalCount').textContent = totalCount;
+            document.getElementById('successCount').textContent = successCount;
+            document.getElementById('errorCount').textContent = errorCount;
+            document.getElementById('errorTotalCount').textContent = errorTotalCount;
+        }
+
+        function sortTable(n) {
+            const table = document.getElementById("resultTable");
+            let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir === "asc") {
+                        if (parseInt(x.textContent) > parseInt(y.textContent)) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir === "desc") {
+                        if (parseInt(x.textContent) < parseInt(y.textContent)) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount === 0 && dir === "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

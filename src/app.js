@@ -209,6 +209,24 @@ app.get('/franklin/url-list', async (req, res) => {
 });
 
 
+app.post('/check-url', async (req, res) => {
+  const url = req.body.url;
+  try {
+      const response = await fetch(url, { method: 'GET', redirect: 'manual' });
+      res.json({
+          url,
+          status: response.status,
+          redirectLocation: response.status >= 300 && response.status < 400 ? response.headers.get('Location') : 'N/A'
+      });
+  } catch (error) {
+      res.json({
+          url,
+          status: 'Error',
+          redirectLocation: 'N/A'
+      });
+  }
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
