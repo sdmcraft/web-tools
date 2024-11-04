@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-import { fetchUrls } from "../frk-utils.js";
+import { fetchUrls, sitemapParser } from "../frk-utils.js";
 
 function wait(seconds) {
     return new Promise(resolve => {
@@ -62,14 +62,23 @@ document.querySelector('#filterForm').addEventListener('submit', async (event) =
     }
     // Check if the "List of URLs" field has a value
     const urlListInput = form.elements.urlList;
+    const indexUrlInput = form.elements.frkIndexUrl.value;
+    const sitemapUrlInput = form.elements.sitemapUrl.value;
     let urlList = [];
     if (urlListInput.value) {
         // Split the input using a regular expression to handle commas, spaces, and newlines
         urlList = urlListInput.value.split(/,|\s|\n/).map(url => url.trim()).filter(url => url !== '');
-    } else {
+    } else if (indexUrlInput) {
         // If the "List of URLs" field is empty, fetch the list from the Franklin Index URL
         const frkIndexUrl = form.elements.frkIndexUrl.value;
         urlList = await fetchUrls(frkIndexUrl);
+    } else if (sitemapUrlInput) {
+        // If the "List of URLs" field is empty, fetch the list from the sitemap URL
+        const sitemapUrl = form.elements.sitemapUrl.value;
+        urlList = await fetchUrls(sitemapUrl, sitemapParser);
+    } else {
+        alert('You must enter a list of URLs, a Franklin Index URL, or a sitemap URL!');
+        return;
     }
 
     const container = document.getElementById('resultContainer');
